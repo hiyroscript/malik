@@ -203,7 +203,9 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
   color:#fff;mix-blend-mode:difference}
 #btnPause{position:absolute;top:12px;right:12px;pointer-events:auto;width:40px;height:40px;color:#fff;
   border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.5);font-size:12px}
-#ctrl{position:absolute;right:12px;bottom:12px;display:flex;align-items:flex-end;gap:10px;pointer-events:none}
+#ctrl{position:absolute;right:14px;bottom:14px;display:flex;align-items:flex-end;gap:10px;pointer-events:none;z-index:3}
+body.touch #ctrl{bottom:120px;right:18px}
+body.touch.lefty #ctrl{right:auto;left:18px}
 .skillBtn{position:relative;width:74px;height:74px;border:1px solid rgba(255,255,255,.5);color:#fff;
   background:rgba(0,0,0,.55);pointer-events:auto;display:grid;place-items:center}
 .skillBtn.ready{border-color:var(--gold);box-shadow:0 0 14px rgba(255,198,61,.35)}
@@ -212,18 +214,34 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 #cdRing{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
 #cdRing circle{fill:none;stroke:var(--gold);stroke-width:4;stroke-dasharray:276;stroke-dashoffset:276}
 #cdText{position:absolute;bottom:3px;right:5px;font-size:10px;font-style:normal;color:var(--gold)}
-#touchCtl{display:none;position:fixed;inset:auto 0 0 0;pointer-events:none}
+#touchCtl{display:none;position:absolute;inset:0;pointer-events:none;z-index:2}
 body.touch #touchCtl{display:block}
-.tbtn{position:absolute;pointer-events:auto;border:1px solid rgba(255,255,255,.35);color:#fff;
-  background:rgba(0,0,0,.5);width:62px;height:62px;font-size:20px;bottom:14px}
-#tLeft{left:14px}#tCrouch{left:84px}#tRight{left:154px}
-.tbtn.big{width:86px;height:86px;right:104px;bottom:14px;font-size:26px}
-body.lefty #tLeft{left:auto;right:14px}body.lefty #tCrouch{left:auto;right:84px}
-body.lefty #tRight{left:auto;right:154px}
-body.lefty .tbtn.big{right:auto;left:104px}
-body.lefty #ctrl{right:auto;left:12px}
-body.touch #tLeft,body.touch #tRight{display:none}
-body.touch.lanes #tLeft,body.touch.lanes #tRight{display:block}
+.tbtn{position:absolute;pointer-events:auto;border:2px solid rgba(255,255,255,.42);color:#fff;
+  border-radius:50%;background:rgba(0,0,0,.36);display:grid;place-items:center;
+  width:70px;height:70px;font-size:22px;line-height:1;transition:background .08s,transform .08s}
+.tbtn:active{background:rgba(255,255,255,.9);color:#000;transform:scale(.94)}
+#tCrouch{left:18px;bottom:18px;width:84px;height:84px;font-size:28px}
+#tJump{right:18px;bottom:18px;width:96px;height:96px;font-size:32px}
+#tLeft{left:18px;bottom:114px}
+#tRight{left:104px;bottom:114px}
+.tbtn.lane{display:none}
+body.touch.lanes .tbtn.lane{display:grid}
+body.lefty #tCrouch{left:auto;right:18px}
+body.lefty #tJump{right:auto;left:18px}
+body.lefty #tLeft{left:auto;right:104px}
+body.lefty #tRight{left:auto;right:18px}
+/* short screens: shrink everything so the pads never cover the ball */
+body.tight .tbtn{width:58px;height:58px;font-size:18px}
+body.tight #tCrouch{width:66px;height:66px;font-size:22px;left:12px;bottom:12px}
+body.tight #tJump{width:74px;height:74px;font-size:24px;right:12px;bottom:12px}
+body.tight #tLeft{bottom:86px;left:12px}
+body.tight #tRight{bottom:86px;left:76px}
+body.tight.touch #ctrl{bottom:96px}
+body.tight .skillBtn{width:58px;height:58px}
+body.tight #skillIcon{font-size:22px}
+body.tight #statBox{font-size:8px;padding:5px 7px;max-width:150px}
+body.tight #worldTag{font-size:16px}
+body.tight #speedTag{font-size:20px}
 
 /* ---------- countdown ---------- */
 #countdown{position:absolute;inset:0;display:grid;place-items:center;z-index:30;pointer-events:none;
@@ -242,7 +260,7 @@ body.touch.lanes #tLeft,body.touch.lanes #tRight{display:block}
 .overStats b{display:block;color:#fff;font-size:22px;font-family:var(--disp);letter-spacing:0;margin-top:4px}
 
 /* ---------- misc ---------- */
-#rotate{position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:#000;
+#rotate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:#000;
   font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-align:center;line-height:2.4;color:var(--dim)}
 #rotate div{font-size:44px;color:#fff}
 #rotate span{font-size:11px}
@@ -258,6 +276,7 @@ body.touch.lanes #tLeft,body.touch.lanes #tRight{display:block}
 </head>
 <body>
 
+<div id="viewport">
 <div id="stage">
   <canvas id="cv" width="960" height="540"></canvas>
 
@@ -291,12 +310,12 @@ body.touch.lanes #tLeft,body.touch.lanes #tRight{display:block}
         <svg viewBox="0 0 100 100" id="cdRing"><circle cx="50" cy="50" r="44"/></svg>
         <em id="cdText"></em>
       </button>
-      <div id="touchCtl">
-        <button class="tbtn" id="tLeft">◀</button>
-        <button class="tbtn" id="tCrouch">▼</button>
-        <button class="tbtn" id="tRight">▶</button>
-        <button class="tbtn big" id="tJump">▲</button>
-      </div>
+    </div>
+    <div id="touchCtl">
+      <button class="tbtn lane" id="tLeft" aria-label="Move left">◀</button>
+      <button class="tbtn lane" id="tRight" aria-label="Move right">▶</button>
+      <button class="tbtn" id="tCrouch" aria-label="Crouch">▼</button>
+      <button class="tbtn jump" id="tJump" aria-label="Jump">▲</button>
     </div>
   </div>
 
@@ -442,8 +461,9 @@ body.touch.lanes #tLeft,body.touch.lanes #tRight{display:block}
     </div>
   </section>
 
-  <div id="rotate" class="hide"><div>↻<br><span data-i18n="rot">Turn your device sideways</span></div></div>
   <div id="toast"></div>
+</div>
+<div id="rotate" class="hide"><div>↻<br><span data-i18n="rot">Turn your device sideways</span></div></div>
 </div>
 
 <script>
@@ -478,13 +498,16 @@ const SPEED_STEPS = (() => {
   const a = [];
   for (let i = 0; i <= 20; i++) {
     const spd = +(1 + i * 0.05).toFixed(2);
-    const dur = i === 20 ? 9999 : +(3.0 + i * 0.24).toFixed(2); // 3.0s -> 7.56s
+    // 4.6s at 1.00x growing to 6.5s at 1.95x — ~111s to reach max, then the finale
+    const dur = i === 20 ? 9999 : +(4.6 + i * 0.10).toFixed(2);
     a.push({ spd, dur });
   }
   return a;
 })();
-// Breathing room right after a world switch — grows with speed.
-const breakTime = s => 0.65 + (s - 1) * 1.35;
+// Obstacle-free runway after a world switch, on top of the terrain already committed.
+const breakTime = s => 1.05 + (s - 1) * 1.05;
+// How much already-visible terrain stays put before the new world takes over.
+const COMMIT_TIME = 0.75;
 
 /* ================= WORLDS ================= */
 const WORLDS = [
@@ -959,9 +982,10 @@ const jumpDist = spd => CFG.PX*spd * (2*CFG.JUMP/CFG.G);      // 287 @1x … 574
 
 function ground(o,x,w,top){ o.solids.push({kind:'ground',x,y:top===undefined?GY:top,w,h:CFG.H-(top===undefined?GY:top)+40}); }
 function block(o,x,y,w,h,kind){ o.solids.push({kind:kind||'block',x,y,w,h}); }
-function spike(o,x,base,stack){
-  const h = SPIKE_H*stack;
-  o.hazards.push({type:'spike',x,y:base-h,w:SPIKE_W,h,stack});
+function spike(o,x,base,n){
+  n = Math.max(1, n|0);
+  // one hazard holding n triangles side by side — spikes never stack upward
+  o.hazards.push({type:'spike',x,y:base-SPIKE_H,w:SPIKE_W*n,h:SPIKE_H,n});
 }
 function coinAt(o,x,y,rng,force){
   const r = rng.next();
@@ -982,17 +1006,17 @@ const PATTERNS = {
 
   /* ground spikes, stackable like GD */
   spikes(o,x,c){
-    const n = c.hard ? c.rng.int(2,3) : c.rng.int(1,2);
-    const gapBetween = Math.max(120, jumpDist(c.spd)*0.55);
-    let w = 60;
-    for (let i=0;i<n;i++){
-      const stack = c.rng.weighted(c.hard? {1:3,2:4,3:2} : {1:6,2:3,3:1})|0;
-      const cluster = c.rng.chance(c.hard?0.45:0.2) ? 2 : 1;   // side-by-side pair
-      for (let k=0;k<cluster;k++) spike(o,x+w+k*SPIKE_W,GY,+stack);
-      if (c.rng.chance(0.35)) coinAt(o,x+w+SPIKE_W/2, GY-SPIKE_H*stack-58, c.rng);
-      w += SPIKE_W*cluster + gapBetween;
+    const groups = c.hard ? c.rng.int(2,3) : c.rng.int(1,2);
+    const gapBetween = Math.max(150, jumpDist(c.spd)*0.55);
+    let w = 70;
+    for (let i=0;i<groups;i++){
+      // width of the row is the difficulty dial, not height
+      const n = +c.rng.weighted(c.hard ? {1:2,2:4,3:3,4:1} : {1:6,2:3,3:1});
+      spike(o, x+w, GY, n);
+      if (c.rng.chance(0.35)) coinAt(o, x+w+SPIKE_W*n/2, GY-SPIKE_H-64, c.rng);
+      w += SPIKE_W*n + gapBetween;
     }
-    w += 60;
+    w += 70;
     ground(o,x,w);
     return w;
   },
@@ -1058,7 +1082,7 @@ const PATTERNS = {
     // drop back down, spikes in the pit below
     const pit = Math.max(100, jd*0.32);
     const spikeStart = cx + Math.max(70, pit*0.5);
-    if (c.hard) for (let s=0;s<2;s++) spike(o,spikeStart+s*SPIKE_W,GY,1);
+    if (c.hard) spike(o,spikeStart,GY,2);
     ground(o,cx,pit+Math.max(110,jd*0.34));
     return (cx+pit+Math.max(110,jd*0.34))-x;
   },
@@ -1077,7 +1101,8 @@ const PATTERNS = {
       cx += stepW; h = Math.min(h+42, jumpH()+96);
     }
     // spike bed under the staircase — falling costs the run
-    for (let sx=x+lead+6; sx<cx-SPIKE_W; sx+=SPIKE_W) spike(o,sx,GY,1);
+    const bedN = clamp(Math.floor((cx-(x+lead)-14)/SPIKE_W), 1, 10);
+    spike(o, x+lead+7, GY, bedN);
     if (c.rng.chance(0.5)) coinAt(o,cx-stepW/2, GY-h-30, c.rng);
     return (cx+Math.max(130,jd*0.42))-x;
   },
@@ -1220,7 +1245,7 @@ const Gen = {
    ============================================================ */
 
 const Game = {
-  cv:null, x:null, W:CFG.W, H:CFG.H,
+  cv:null, x:null, W:CFG.W, H:CFG.H, dpr:1,
   state:'idle',              // idle | run | pause | dying | over
   mode:'chal',               // chal | adv
   level:null,
@@ -1231,7 +1256,7 @@ const Game = {
   worldId:'blank', pal:null, palFrom:null, palTo:null, palK:1,
   trans:null, breakUntilX:0, nameT:0,
   runCoins:0, runShards:0, attempts:1,
-  solids:[], hazards:[], picks:[], fx:[], bgParts:[], sand:[],
+  solids:[], hazards:[], picks:[], fx:[], bgParts:[], sand:[], sandClouds:[], sandK:0, gustT:0,
   colTimer:0, colEvents:[],
   bgT:0, shake:0, shakeMag:0,
   barrierX:-260, fill:0, overShown:false, result:null,
@@ -1252,11 +1277,29 @@ const Game = {
     this.lastT = performance.now();
     this.raf = requestAnimationFrame(t=>this.loop(t));
   },
+  /* The playfield keeps a fixed logical height and stretches horizontally to
+     match the screen, so a phone in landscape fills edge to edge instead of
+     sitting in a letterbox with the HUD floating somewhere else. */
   resize(){
-    const s = document.getElementById('stage');
-    const portrait = innerHeight > innerWidth && innerWidth < 900;
-    document.getElementById('rotate').classList.toggle('hide', !(portrait && matchMedia('(pointer:coarse)').matches));
-    void s;
+    const vw = Math.max(1, innerWidth), vh = Math.max(1, innerHeight);
+    const coarse = matchMedia('(pointer:coarse)').matches;
+    const portrait = vh > vw;
+    document.getElementById('rotate').classList.toggle('hide', !(portrait && coarse));
+
+    this.H = CFG.H;
+    this.W = Math.round(clamp(CFG.H * (vw/vh), 640, 1600));
+
+    // fit that logical box inside the window, then size the frame to it exactly
+    const scale = Math.min(vw/this.W, vh/this.H);
+    const dw = Math.round(this.W*scale), dh = Math.round(this.H*scale);
+    const st = document.getElementById('stage');
+    st.style.width = dw+'px'; st.style.height = dh+'px';
+
+    this.dpr = Math.min(devicePixelRatio || 1, 2.5);
+    this.cv.width  = Math.round(this.W*this.dpr);
+    this.cv.height = Math.round(this.H*this.dpr);
+    this.cv.style.width = '100%'; this.cv.style.height = '100%';
+    document.body.classList.toggle('tight', dh < 420);
   },
 
   /* ---------------- input ---------------- */
@@ -1327,16 +1370,16 @@ const Game = {
 
   reset(worldId, spd, seed){
     this.t=0; this.score=0; this.worldX=0; this.spd=spd;
-    this.solids=[]; this.hazards=[]; this.picks=[]; this.fx=[]; this.sand=[];
+    this.solids=[]; this.hazards=[]; this.picks=[]; this.fx=[]; this.sand=[]; this.sandClouds=[];
     this.runCoins=0; this.runShards=0; this.skillUses=0; this.cd=0;
     this.barrierX=-320; this.fill=0; this.overShown=false; this.result=null;
     this.shake=0; this.bgT=0; this.colTimer=0.9;
-    this.worldId=worldId; this.trans=null; this.palK=1;
+    this.worldId=worldId; this.trans=null; this.palK=1; this.sandK=0;
     this.pal = Object.assign({}, worldById(worldId).pal);
     this.nameT = 2.4;
     this.rules = {}; (this.level?this.level.rules:[]).forEach(r=>this.rules[r]=true);
     Gen.reset(seed, 0);
-    this.breakUntilX = 380;   // free run-up at the start of every attempt
+    this.breakUntilX = CFG.PX*spd*1.9 + 260;   // free run-up at the start of every attempt
     this.stats = { jumps:0, djumps:0, slows:0, crouches:0, skills:0, att:this.attempts };
     this.p = {
       by: GY, vy:0, h:CFG.R*2, targetH:CFG.R*2, grounded:true, jumps:0, maxJumps:2,
@@ -1344,6 +1387,10 @@ const Game = {
       crouch:false, alive:true, invuln:0, fadeT:0, tripleT:0, dashT:0, cleanseT:0,
       gumT:0, gumCd:0, coyote:0, lane:1, laneX:CFG.PLAYER_X, dead:false, trail:[]
     };
+    if (worldById(worldId).mech==='columns'){
+      this.p.lane = 1;
+      this.p.screenX = this.laneCenter(1);
+    }
     this.makeBgParts();
     this.buildAhead();
     document.body.classList.toggle('lanes', this.worldId==='malik');
@@ -1368,33 +1415,71 @@ const Game = {
 
   /* ---------------- world switching ---------------- */
   switchWorld(id){
-    if (id===this.worldId) return;
+    if (id===this.worldId || this.trans) return;
     const from = worldById(this.worldId), to = worldById(id);
     let kind = 'wipe';
     if (to.mech==='columns') kind='build';
     else if (from.mech==='columns') kind='unbuild';
     else if (to.mech==='flip' || from.mech==='flip') kind='flip';
-    this.trans = { k:kind, t:0, dur: kind==='wipe'?0.75:1.0, from:this.worldId, to:id, swapped:false };
+    this.trans = { k:kind, t:0, dur: kind==='wipe'?0.7:1.0, from:this.worldId, to:id, swapped:false };
     this.palFrom = Object.assign({}, from.pal); this.palTo = Object.assign({}, to.pal); this.palK = 0;
     Audio2.playWorld(id, false);
     Audio2.sfx('world');
-    // breathing room, longer the faster we go
-    this.breakUntilX = this.worldX + CFG.PX*this.spd*breakTime(this.spd) + 460;
+
+    /* ---- carve a genuinely empty runway ----
+       Terrain the player has already committed to stays put. Everything past
+       that dissolves on screen, and the floor runs flat until breakUntilX.
+       Without this the generator was already miles ahead and the breather
+       never actually happened. */
+    const px  = CFG.PX*this.spd;
+    const cut = this.worldX + this.p.screenX + px*COMMIT_TIME;
+
+    for (const h of this.hazards){
+      if (h.type==='fall' || h.type==='bar'){ h.vanishT = 0.22; continue; }
+      if ((h.x===undefined ? 1e9 : h.x) > cut) h.vanishT = 0.26 + Math.random()*0.22;
+    }
+    this.picks = this.picks.filter(c => c.x < cut);
+
+    const kept = [];
+    for (const sd of this.solids){
+      if (sd.x >= cut){
+        if (sd.kind !== 'ground'){ sd.vanishT = 0.3 + Math.random()*0.2; kept.push(sd); }
+        continue;                                   // stale floor is rebuilt flat below
+      }
+      if (sd.kind === 'ground' && sd.x + sd.w > cut) sd.w = cut - sd.x;
+      kept.push(sd);
+    }
+    this.solids = kept;
+
+    Gen.reset(Math.floor(Math.random()*1e9), cut);
+    // include the transition itself, so the clear stretch AFTER the new world
+    // appears is exactly breakTime — short when slow, long when fast
+    this.breakUntilX = this.worldX + this.p.screenX + px*(this.trans.dur + breakTime(this.spd));
   },
   finishSwitch(){
-    const id = this.trans.to;
+    const id = this.trans.to, p = this.p;
+    const wasColumns = worldById(this.trans.from).mech==='columns';
     this.worldId = id;
     this.pal = Object.assign({}, worldById(id).pal);
-    this.nameT = 2.2;
+    this.nameT = 2.6;
     this.makeBgParts();
-    this.colTimer = 1.1;
-    // Malik has no common obstacles at all — clear whatever is still coming
-    if (id==='malik' || this.trans.from==='malik'){
-      const cut = this.worldX + this.W*0.6;
-      this.hazards = this.hazards.filter(h=>h.x < cut);
-      this.picks   = this.picks.filter(h=>h.x < cut);
-      Gen.cursor = Math.max(Gen.cursor, this.breakUntilX);
+    this.colTimer = 1.4;
+    this.sandK = 0;
+
+    if (worldById(id).mech==='columns'){
+      // drop into the middle column, on the floor, ready to dodge
+      p.lane = 1;
+      p.screenX = this.laneCenter(1);
+      p.by = GY; p.vy = 0; p.grounded = true; p.jumps = 0; p.gliding = false;
+      p.crouch = false; p.targetH = CFG.R*2;
+      this.hazards = this.hazards.filter(h=>h.type!=='gum');
+    } else if (wasColumns){
+      // walk the ball back to its normal running position instead of stranding it
+      p.lane = 1;
+      p.by = GY; p.vy = 0; p.grounded = true; p.jumps = 0;
+      this.hazards = this.hazards.filter(h=>h.type!=='fall' && h.type!=='bar');
     }
+
     UI.setWorldName(worldById(id).name);
     document.body.classList.toggle('lanes', id==='malik');
   },
@@ -1465,8 +1550,11 @@ const Game = {
     this.streak(p.screenX, p.by-p.h/2, -dir);
   },
 
-  laneCenter(i){ const x0=178, w=(this.W-x0-30)/3; return x0+w*(i+0.5); },
-  laneEdges(){ const x0=178, w=(this.W-x0-30)/3; return [x0,x0+w,x0+2*w,x0+3*w]; },
+  laneEdges(){
+    const w = Math.min(this.W*0.74, 690), x0 = (this.W-w)/2, c = w/3;
+    return [x0, x0+c, x0+2*c, x0+3*c];
+  },
+  laneCenter(i){ const e=this.laneEdges(); return (e[i]+e[i+1])/2; },
 
   /* ---------------- skills ---------------- */
   useSkill(){
@@ -1493,7 +1581,6 @@ const Game = {
     }
     if (id==='cleanse'){
       p.cleanseT=5; p.gumT=0; Audio2.sfx('sk_cleanse');
-      this.sand.length=0;
       this.hazards = this.hazards.filter(h=>h.type!=='gum');
       this.ring(p.screenX,p.by-p.h/2,10,340,'#7be3ff',0.85);
       for(let i=0;i<22;i++) this.fx.push({k:'spark',x:p.screenX,y:p.by-p.h/2,vx:rand(-260,260),vy:rand(-260,120),life:0.7,t:0,c:'#d8f8ff'});
@@ -1584,8 +1671,12 @@ const Game = {
       p.gumT-=dt;
       p.screenX -= 108*dt;
       if (p.gumT<=0){ p.sqY=1.15; p.sqX=0.9; p.gumCd=0.7; }
-    } else if (p.screenX < CFG.PLAYER_X && !this.inColumns){
-      p.screenX = Math.min(CFG.PLAYER_X, p.screenX + 95*dt);
+    } else if (!this.inColumns){
+      const d = CFG.PLAYER_X - p.screenX;
+      if (Math.abs(d) > 0.5){
+        // drifts forward slowly (gum costs you ground) but snaps back from the lane world
+        p.screenX += d > 0 ? Math.min(d, 105*dt) : Math.max(d, -330*dt);
+      }
     }
 
     /* ---- lane tween (Malik) ---- */
@@ -1652,10 +1743,14 @@ const Game = {
       }
     }
 
+    /* ---- dissolve leftovers from the previous world ---- */
+    for (const h of this.hazards) if (h.vanishT!==undefined){ h.vanishT-=dt; if(h.vanishT<=0) h.dead=true; }
+    for (const sd of this.solids) if (sd.vanishT!==undefined){ sd.vanishT-=dt; if(sd.vanishT<=0) sd.dead=true; }
+
     /* ---- housekeeping ---- */
     this.buildAhead();
     const cull = this.worldX-260;
-    this.solids  = this.solids.filter(s=>s.x+s.w>cull);
+    this.solids  = this.solids.filter(s=>s.x+s.w>cull && !s.dead);
     this.hazards = this.hazards.filter(h=>(h.x===undefined?true:h.x+ (h.w||60) > cull) && !h.dead);
     this.updateFx(dt);
     if (this.shake>0){ this.shake-=dt; if(this.shake<=0) this.shakeMag=0; }
@@ -1672,6 +1767,7 @@ const Game = {
 
     if (!this.inColumns){
       for (const s of this.solids){
+        if (s.vanishT!==undefined) continue;          // already fading out of the world
         const sx = s.x-this.worldX;
         if (sx+s.w < box.x || sx > box.x+box.w) continue;
         if (box.y+box.h < s.y || box.y > s.y+s.h) continue;
@@ -1703,6 +1799,7 @@ const Game = {
       // walked off a ledge
       let support=false;
       for (const s of this.solids){
+        if (s.vanishT!==undefined) continue;
         const sx=s.x-this.worldX;
         if (sx < box.x+box.w && sx+s.w > box.x && Math.abs(s.y-p.by)<3){ support=true; break; }
       }
@@ -1723,7 +1820,7 @@ const Game = {
           }
           continue;
         }
-        if (ghost) continue;
+        if (ghost || h.vanishT!==undefined) continue;
         const b = this.hazBox(h);
         if (!b) continue;
         if (box.x < b.x+b.w && box.x+box.w > b.x && box.y < b.y+b.h && box.y+box.h > b.y){
@@ -1737,7 +1834,7 @@ const Game = {
   hazBox(h){
     const sx = (h.type==='fall'||h.type==='bar') ? h.sx : h.x-this.worldX;
     if (sx===undefined) return null;
-    if (h.type==='spike') return { x:sx+7, y:h.y+6, w:h.w-14, h:h.h-6 };
+    if (h.type==='spike') return { x:sx+6, y:h.y+7, w:h.w-12, h:h.h-7 };
     if (h.type==='mover') return { x:sx+3, y:h.cy-h.h/2+3, w:h.w-6, h:h.h-6 };
     if (h.type==='fall')  return { x:sx-h.w/2+4, y:h.y+4, w:h.w-8, h:h.h-8 };
     if (h.type==='bar')   return { x:h.bx, y:h.y, w:h.bw, h:h.h };
@@ -1760,18 +1857,33 @@ const Game = {
       }
     }
 
-    /* Wüste — sandstorm */
-    if (w.mech==='sand' || this.rules.sand){
-      if (p.cleanseT>0) this.sand.length=0;
-      else {
-        const want = Save.d.set.particles?170:70;
-        while (this.sand.length<want) this.sand.push({x:rand(0,this.W),y:rand(0,this.H),v:rand(0.7,2.1),r:rand(0.8,2.6),a:rand(.15,.5)});
-        for (const s of this.sand){
-          s.x -= px*dt*s.v*0.55; s.y += Math.sin(this.bgT*2+s.x*0.01)*22*dt;
-          if (s.x<-6){ s.x=this.W+rand(0,60); s.y=rand(0,this.H); }
-        }
+    /* Wüste — a storm that genuinely takes the screen away from you */
+    const storming = (w.mech==='sand' || this.rules.sand) && !this.trans;
+    if (storming && p.cleanseT<=0){
+      this.sandK = Math.min(1, this.sandK + dt*0.8);          // ramps in, never blinds instantly
+    } else {
+      this.sandK = Math.max(0, this.sandK - dt*(p.cleanseT>0 ? 3.4 : 1.6));
+    }
+    if (this.sandK > 0.01){
+      this.gustT = (this.gustT||0) + dt;
+      const want = Save.d.set.particles ? 220 : 110;
+      while (this.sand.length < want)
+        this.sand.push({x:rand(0,this.W),y:rand(-40,this.H+40),v:rand(0.9,2.6),
+                        len:rand(14,58),a:rand(.25,.75),w:rand(.8,2.4)});
+      for (const sp of this.sand){
+        sp.x -= px*dt*sp.v*0.8;
+        sp.y += Math.sin(this.bgT*2.2 + sp.x*0.008)*34*dt;
+        if (sp.x < -70){ sp.x = this.W+rand(0,90); sp.y = rand(-40,this.H+40); }
       }
-    } else this.sand.length=0;
+      while (this.sandClouds.length < (Save.d.set.particles?9:5))
+        this.sandClouds.push({x:rand(0,this.W),y:rand(0,this.H),r:rand(90,230),
+                              v:rand(0.35,1.1),a:rand(.45,1)});
+      for (const c of this.sandClouds){
+        c.x -= px*dt*c.v*0.5;
+        c.y += Math.sin(this.bgT*0.9 + c.r)*16*dt;
+        if (c.x < -c.r-40){ c.x = this.W+c.r+rand(0,140); c.y = rand(0,this.H); }
+      }
+    } else { this.sand.length=0; this.sandClouds.length=0; }
 
     /* Malik — column spawns on a seeded timer */
     if (this.inColumns){
@@ -1905,8 +2017,9 @@ const Game = {
      ============================================================ */
   render(dt){
     const x=this.x, W=this.W, H=this.H;
-    x.save();
+    x.setTransform(this.dpr||1,0,0,this.dpr||1,0,0);
     x.clearRect(0,0,W,H);
+    x.save();
 
     if (this.state==='idle'){ x.fillStyle='#000'; x.fillRect(0,0,W,H); x.restore(); return; }
 
@@ -2026,13 +2139,16 @@ const Game = {
     const x=this.x, k=clamp(this.nameT/2.2,0,1);
     const a = k>0.8 ? (1-k)/0.2 : Math.min(1,k/0.35);
     x.save();
-    x.globalAlpha = clamp(a,0,1);
+    x.globalAlpha = clamp(a,0,1)*0.9;
     x.fillStyle=this.pal.text;
-    x.font = `bold ${Math.min(150, 1000/Math.max(6,worldById(this.worldId).name.length))}px Haettenschweiler, "Arial Narrow", Impact, sans-serif`;
+    x.strokeStyle=this.pal.accent; x.lineWidth=2;
+    x.font = `bold ${Math.min(150, (this.W*1.05)/Math.max(6,worldById(this.worldId).name.length))}px Haettenschweiler, "Arial Narrow", Impact, sans-serif`;
     x.textAlign='center'; x.textBaseline='middle';
     x.save();
     if (worldById(this.worldId).mech==='flip'){ x.translate(this.W/2,this.H*0.42); x.scale(1,-1); x.translate(-this.W/2,-this.H*0.42); }
     x.fillText(worldById(this.worldId).name, this.W/2, this.H*0.42);
+    x.globalAlpha *= 0.5;
+    x.strokeText(worldById(this.worldId).name, this.W/2, this.H*0.42);
     x.restore();
     x.restore();
   },
@@ -2048,6 +2164,12 @@ const Game = {
       for (let i=0;i<3;i++){
         x.fillStyle = i%2 ? 'rgba(255,42,23,.05)' : 'rgba(255,255,255,.025)';
         x.fillRect(e[i],0,e[i+1]-e[i],this.H);
+      }
+      if (this.inColumns){                       // show which column you occupy
+        const l=e[this.p.lane], r=e[this.p.lane+1];
+        const g=x.createLinearGradient(0,this.H,0,0);
+        g.addColorStop(0,'rgba(255,42,23,.24)'); g.addColorStop(1,'rgba(255,42,23,0)');
+        x.fillStyle=g; x.fillRect(l,0,r-l,this.H);
       }
       [e[1],e[2]].forEach(ex=>{
         x.strokeStyle='rgba(255,42,23,.55)'; x.lineWidth=7;
@@ -2114,13 +2236,13 @@ const Game = {
   },
   drawSpike(h){
     const x=this.x, sx=h.x-this.worldX;
-    if (sx>this.W+40||sx<-60) return;
+    if (sx>this.W+40||sx+h.w<-60) return;
     x.fillStyle=this.pal.obst; x.strokeStyle='#000'; x.lineWidth=2;
-    const st=h.stack||1;
-    for(let i=0;i<st;i++){
-      const base=h.y+h.h-i*SPIKE_H, top=base-SPIKE_H;
-      x.beginPath(); x.moveTo(sx,base); x.lineTo(sx+h.w/2,top); x.lineTo(sx+h.w,base); x.closePath();
-      x.fill(); x.stroke();
+    const n=h.n||1, base=h.y+h.h;
+    for(let i=0;i<n;i++){
+      const l=sx+i*SPIKE_W;
+      x.beginPath(); x.moveTo(l,base); x.lineTo(l+SPIKE_W/2,h.y); x.lineTo(l+SPIKE_W,base);
+      x.closePath(); x.fill(); x.stroke();
     }
   },
   drawMover(h){
@@ -2240,14 +2362,28 @@ const Game = {
 
   drawOverlays(){
     const x=this.x;
-    /* sandstorm */
-    if (this.sand.length){
+    /* sandstorm — veil, then gusts, then grit */
+    if (this.sandK > 0.01){
+      const k = this.sandK, W=this.W, H=this.H;
+      const gust = 0.82 + Math.sin(this.gustT*0.75)*0.18;
       x.save();
-      for (const s of this.sand){
-        x.fillStyle=`rgba(226,160,70,${s.a})`;
-        x.beginPath(); x.arc(s.x,s.y,s.r,0,7); x.fill();
+      x.fillStyle = `rgba(206,120,34,${0.42*k*gust})`;
+      x.fillRect(0,0,W,H);
+      for (const c of this.sandClouds){
+        const g = x.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
+        g.addColorStop(0, `rgba(238,182,104,${0.50*k*c.a*gust})`);
+        g.addColorStop(0.65,`rgba(226,158,74,${0.24*k*c.a*gust})`);
+        g.addColorStop(1, 'rgba(226,158,74,0)');
+        x.fillStyle=g; x.beginPath(); x.arc(c.x,c.y,c.r,0,7); x.fill();
       }
-      x.fillStyle='rgba(226,140,40,.13)'; x.fillRect(0,0,this.W,this.H);
+      x.lineCap='round';
+      for (const sp of this.sand){
+        x.strokeStyle = `rgba(255,222,168,${sp.a*k*0.85})`;
+        x.lineWidth = sp.w;
+        x.beginPath(); x.moveTo(sp.x,sp.y); x.lineTo(sp.x+sp.len,sp.y+2.5); x.stroke();
+      }
+      x.fillStyle = `rgba(180,92,20,${0.16*k})`;
+      x.fillRect(0,0,W,H);
       x.restore();
     }
     /* particle fx that live in world space */
@@ -2313,10 +2449,16 @@ const Game = {
     const x=this.x, W=this.W, H=this.H, k=clamp(this.trans.t/this.trans.dur,0,1);
     x.save();
     if (this.trans.k==='wipe'){
-      const a = k<0.5 ? k*2 : (1-k)*2;
-      x.globalAlpha=a*0.55; x.fillStyle='#000';
-      const w=W*1.25*(k<0.5?k*2:1);
-      x.beginPath(); x.moveTo(W-w,0); x.lineTo(W,0); x.lineTo(W,H); x.lineTo(W-w-120,H); x.closePath(); x.fill();
+      // a bright leading edge sweeps across; the world behind it is never hidden
+      const e = W*1.30*k - 140;
+      const g = x.createLinearGradient(W-e-200,0,W-e+60,0);
+      g.addColorStop(0,'rgba(0,0,0,0)');
+      g.addColorStop(0.72,`rgba(0,0,0,${0.34*Math.sin(k*Math.PI)})`);
+      g.addColorStop(0.95,`rgba(255,255,255,${0.55*Math.sin(k*Math.PI)})`);
+      g.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=g;
+      x.beginPath(); x.moveTo(W-e-200,0); x.lineTo(W-e+60,0);
+      x.lineTo(W-e-60,H); x.lineTo(W-e-320,H); x.closePath(); x.fill();
     } else if (this.trans.k==='build'||this.trans.k==='unbuild'){
       const build = this.trans.k==='build';
       const kk = build?k:1-k;
@@ -2329,7 +2471,7 @@ const Game = {
       x.fillStyle='#000';
       x.fillRect(0,0,W,H*Math.max(0,(kk-0.75)*4));
     } else if (this.trans.k==='flip'){
-      x.globalAlpha=Math.sin(k*Math.PI)*0.5; x.fillStyle='#000'; x.fillRect(0,0,W,H);
+      x.globalAlpha=Math.sin(k*Math.PI)*0.28; x.fillStyle='#000'; x.fillRect(0,0,W,H);
     }
     x.restore();
   }
