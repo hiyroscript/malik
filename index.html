@@ -22,13 +22,18 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#000;color:#fff;font-family:var(--body);
   overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
-button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;touch-action:manipulation}
+#cv,.tbtn,.skillBtn{touch-action:none}
 button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
 .hide{display:none !important}
 
-#stage{position:fixed;inset:0;display:grid;place-items:center;background:#000}
-#cv{display:block;image-rendering:auto;background:#000;
-  width:100%;height:100%;object-fit:contain}
+#viewport{position:fixed;inset:0;display:grid;place-items:center;background:#000}
+/* #stage is sized in JS to match the canvas exactly, so the HUD and every menu
+   line up with the playfield instead of floating over letterbox bars.
+   container/size lets the screens scale off the playfield, not the window. */
+#stage{position:relative;width:960px;height:540px;overflow:hidden;background:#000;
+  container:stage / size}
+#cv{display:block;image-rendering:auto;background:#000;width:100%;height:100%}
 
 /* ---------- screens ---------- */
 .screen{position:absolute;inset:0;display:none;place-items:center;background:#000;z-index:20}
@@ -37,7 +42,7 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 /* ---------- splash ---------- */
-#splash{background:#000;grid-template-rows:1fr auto;padding:0 0 8vh}
+#splash{background:#000;grid-template-rows:1fr auto;padding:0 0 8cqh}
 .splashMark{display:grid;place-items:center;align-self:center}
 .ball{width:76px;height:76px;border:2px solid #fff;border-radius:50%;position:relative;
   animation:roll 2.2s cubic-bezier(.6,0,.35,1) infinite}
@@ -50,13 +55,13 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 @keyframes sig{0%,25%{opacity:0}55%{opacity:1}100%{opacity:1}}
 
 /* ---------- panels ---------- */
-.panel{position:relative;width:min(92vw,860px);max-height:88vh;overflow-y:auto;overscroll-behavior:contain;
+.panel{position:relative;width:min(92cqw,860px);max-height:86cqh;overflow-y:auto;overscroll-behavior:contain;
   border:1px solid var(--line);padding:34px 30px;background:#000;
   animation:panelIn .3s cubic-bezier(.2,.9,.3,1) both}
-.panel.wide{width:min(96vw,1040px)}
-.panel.narrow{width:min(92vw,470px);text-align:center}
+.panel.wide{width:min(96cqw,1040px)}
+.panel.narrow{width:min(92cqw,470px);text-align:center}
 @keyframes panelIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.panel h2{font-family:var(--disp);font-stretch:condensed;font-size:clamp(30px,5.2vw,46px);letter-spacing:.02em;
+.panel h2{font-family:var(--disp);font-stretch:condensed;font-size:clamp(20px,min(5.2cqw,7cqh),44px);letter-spacing:.02em;
   text-transform:uppercase;margin-bottom:20px;line-height:.95}
 .panel .sub{color:var(--dim);font-size:14px;line-height:1.6;margin-bottom:24px}
 .back{position:absolute;top:16px;right:18px;width:40px;height:40px;border:1px solid var(--line);
@@ -64,27 +69,37 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 .back:hover{background:#fff;color:#000}
 
 /* ---------- home ---------- */
-#home{grid-template-rows:1fr auto;padding:5vh 6vw 3vh}
-.homeGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:6vw;align-items:center;width:100%;max-width:1100px;margin:auto}
-.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.32em;color:var(--dim);margin-bottom:14px}
-.title{font-family:var(--disp);font-stretch:condensed;font-size:clamp(72px,17vw,190px);line-height:.8;letter-spacing:-.01em;
+#home{grid-template-rows:1fr auto;padding:5cqh 6cqw 3cqh}
+.homeGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:4cqw;align-items:center;width:100%;max-width:1100px;margin:auto}
+.kicker{font-family:var(--mono);font-size:clamp(7px,1.9cqh,10px);letter-spacing:.32em;color:var(--dim);
+  margin-bottom:clamp(5px,2.4cqh,14px)}
+.title{font-family:var(--disp);font-stretch:condensed;font-size:clamp(34px,min(16cqw,31cqh),180px);line-height:.8;letter-spacing:-.01em;
   text-transform:uppercase;-webkit-text-stroke:0;position:relative}
 .title::after{content:"MALIK";position:absolute;left:4px;top:3px;color:var(--sig);z-index:-1;opacity:.85}
-.rule{height:1px;background:var(--line);margin:22px 0 12px}
+.rule{height:1px;background:var(--line);margin:clamp(8px,3.6cqh,22px) 0 clamp(5px,2cqh,12px)}
 .hs{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--dim)}
 .hs b{color:#fff}
 .menu{display:flex;flex-direction:column;gap:2px}
-.mrow{display:flex;align-items:center;gap:16px;padding:15px 14px;border-bottom:1px solid var(--line);
-  font-family:var(--disp);font-size:clamp(22px,3.4vw,32px);letter-spacing:.03em;text-transform:uppercase;
+.mrow{display:flex;align-items:center;gap:clamp(8px,2cqw,16px);padding:clamp(6px,2.3cqh,15px) 14px;
+  border-bottom:1px solid var(--line);
+  font-family:var(--disp);font-size:clamp(15px,min(3.4cqw,5.9cqh),32px);letter-spacing:.03em;text-transform:uppercase;
   transition:.16s ease;position:relative;text-align:left}
 .mrow .idx{font-family:var(--body);font-size:14px;color:var(--sig);width:20px;transition:.16s}
 .mrow:hover,.mrow.hot{padding-left:26px;background:#fff;color:#000}
 .mrow:hover .idx,.mrow.hot .idx{color:#000}
-.homeFoot{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--dim);padding-top:10px}
+.homeFoot{font-family:var(--mono);font-size:clamp(8px,2cqh,11px);letter-spacing:.2em;color:var(--dim);padding-top:6px}
 .homeFoot b{color:#fff}
-@media (max-width:760px){
-  .homeGrid{grid-template-columns:1fr;gap:22px;text-align:left}
-  .title{font-size:clamp(64px,22vw,120px)}
+@container stage (max-width:680px){
+  .homeGrid{grid-template-columns:1fr;gap:3cqh;text-align:left}
+  .title{font-size:clamp(34px,min(21cqw,26cqh),120px)}
+}
+/* short landscape (phones): pull everything in so nothing runs off the bottom */
+@container stage (max-height:430px){
+  #home{padding:4cqh 5cqw 3cqh}
+  .rule{margin:2.4cqh 0 1.6cqh}
+  .mrow{padding:clamp(5px,2cqh,11px) 12px}
+  .panel{padding:16px}
+  .panel h2{margin-bottom:8px}
 }
 
 /* ---------- buttons ---------- */
@@ -109,14 +124,14 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 .card:hover .cardTag{border-color:#000}
 .cardTag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;
   border:1px solid var(--line);padding:3px 8px;margin-bottom:14px}
-.card h3{font-family:var(--disp);font-size:clamp(26px,4vw,38px);text-transform:uppercase;line-height:.95;margin-bottom:10px}
+.card h3{font-family:var(--disp);font-size:clamp(18px,min(4cqw,6.5cqh),38px);text-transform:uppercase;line-height:.95;margin-bottom:10px}
 .card p{font-size:13px;line-height:1.55;color:var(--dim);margin-bottom:16px}
 .card:hover p{color:#333}
 .cardBest{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--dim)}
 @media (max-width:700px){.cards{grid-template-columns:1fr}}
 
 /* ---------- levels ---------- */
-.lvlList{display:grid;gap:6px;max-height:62vh;overflow-y:auto;padding-right:4px}
+.lvlList{display:grid;gap:6px;max-height:52cqh;overflow-y:auto;padding-right:4px}
 .lvl{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;
   border:1px solid var(--line);padding:12px 14px;text-align:left;transition:.15s}
 .lvl:hover{background:#fff;color:#000}
@@ -140,7 +155,7 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 .refresh{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--dim);margin-bottom:14px}
 .refresh b{color:var(--sig)}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.gridL{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;max-height:58vh;overflow-y:auto;padding-right:4px}
+.gridL{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;max-height:48cqh;overflow-y:auto;padding-right:4px}
 .gridS{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
 @media (max-width:700px){.grid5{grid-template-columns:repeat(2,1fr)}}
 .item{border:1px solid var(--line);padding:12px 10px;text-align:center;transition:.15s;position:relative}
@@ -196,7 +211,7 @@ button:focus-visible,.mrow:focus-visible{outline:2px solid var(--sig);outline-of
 #coinTag{font-size:11px;letter-spacing:.1em;display:flex;gap:5px;align-items:center;
   background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.16);padding:4px 9px}
 #coinTag .c{color:var(--gold)}#coinTag .s{color:var(--shard)}
-#progWrap{width:min(52vw,420px);height:14px;border:1px solid #000;background:rgba(0,0,0,.4);position:relative;
+#progWrap{width:min(46cqw,420px);height:14px;border:1px solid #000;background:rgba(0,0,0,.4);position:relative;
   box-shadow:0 0 0 1px rgba(255,255,255,.25)}
 #progFill{height:100%;width:0;background:#fff;transition:width .08s linear}
 #progPct{position:absolute;inset:0;display:grid;place-items:center;font-size:9px;letter-spacing:.16em;
@@ -246,15 +261,15 @@ body.tight #speedTag{font-size:20px}
 /* ---------- countdown ---------- */
 #countdown{position:absolute;inset:0;display:grid;place-items:center;z-index:30;pointer-events:none;
   background:rgba(0,0,0,.35)}
-#countdown span{font-family:var(--disp);font-size:clamp(90px,18vw,190px);line-height:1;
+#countdown span{font-family:var(--disp);font-size:clamp(56px,min(18cqw,32cqh),190px);line-height:1;
   animation:cd .9s ease both}
 @keyframes cd{0%{transform:scale(1.7);opacity:0}30%{transform:scale(1);opacity:1}100%{transform:scale(.85);opacity:0}}
 
 /* ---------- game over ---------- */
-.overWrap{text-align:center;padding:0 6vw;animation:overIn .34s .05s cubic-bezier(.2,.9,.3,1) both}
+.overWrap{text-align:center;padding:0 6cqw;animation:overIn .34s .05s cubic-bezier(.2,.9,.3,1) both}
 @keyframes overIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 .overKick{font-family:var(--mono);font-size:10px;letter-spacing:.34em;color:var(--sig);margin-bottom:10px}
-.overTitle{font-family:var(--disp);font-size:clamp(46px,11vw,110px);line-height:.85;text-transform:uppercase;margin-bottom:20px}
+.overTitle{font-family:var(--disp);font-size:clamp(28px,min(11cqw,19cqh),110px);line-height:.85;text-transform:uppercase;margin-bottom:20px}
 .overStats{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-bottom:26px;
   font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--dim)}
 .overStats b{display:block;color:#fff;font-size:22px;font-family:var(--disp);letter-spacing:0;margin-top:4px}
@@ -264,9 +279,9 @@ body.tight #speedTag{font-size:20px}
   font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-align:center;line-height:2.4;color:var(--dim)}
 #rotate div{font-size:44px;color:#fff}
 #rotate span{font-size:11px}
-#toast{position:absolute;left:50%;bottom:8vh;transform:translateX(-50%) translateY(20px);z-index:70;
+#toast{position:absolute;left:50%;bottom:9cqh;transform:translateX(-50%) translateY(20px);z-index:70;
   background:#fff;color:#000;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-  padding:11px 18px;opacity:0;pointer-events:none;transition:.22s;white-space:nowrap;max-width:90vw}
+  padding:11px 18px;opacity:0;pointer-events:none;transition:.22s;white-space:nowrap;max-width:90cqw}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
@@ -455,6 +470,7 @@ body.tight #speedTag{font-size:20px}
       <h2 class="overTitle" id="overTitle">GAME OVER</h2>
       <div class="overStats" id="overStats"></div>
       <div class="btnRow">
+        <button class="mbtn" id="btnNext" data-i18n="o_next">NEXT LEVEL</button>
         <button class="mbtn" id="btnAgain" data-i18n="o_again">TRY AGAIN</button>
         <button class="mbtn ghost" id="btnHome" data-i18n="o_home">MENU</button>
       </div>
@@ -642,7 +658,7 @@ const I18N = {
     st_time:'TIME', st_score:'SCORE', st_jump:'JUMPS', st_djump:'DOUBLE JUMPS',
     st_slow:'SLOW FALLS', st_crouch:'CROUCHES', st_skill:'SKILL', st_att:'ATTEMPTS',
     p_title:'PAUSED', p_resume:'RESUME', p_restart:'RESTART', p_quit:'QUIT TO MENU',
-    o_again:'TRY AGAIN', o_home:'MENU', o_over:'GAME OVER', o_win:'YOU SURVIVED',
+    o_next:'NEXT LEVEL', o_alldone:'ALL LEVELS CLEARED', o_again:'TRY AGAIN', o_home:'MENU', o_over:'GAME OVER', o_win:'YOU SURVIVED',
     o_clear:'LEVEL CLEAR', o_wall:'THE WALL CAUGHT YOU', o_run:'RUN ENDED',
     o_best:'BEST', o_score:'SCORE', o_time:'TIME', o_prog:'PROGRESS',
     set_lang:'Language', set_sfx:'Sound effects', set_mus:'Music',
@@ -654,7 +670,7 @@ const I18N = {
     rot:'Turn your device sideways',
     t_bought:'Purchased', t_equipped:'Equipped', t_nocoins:'Not enough coins',
     t_noshards:'Not enough shards', t_owned:'Already owned', t_reset:'Progress erased',
-    t_unlock:'New design unlocked', t_win:'Two Minutes design unlocked',
+    t_unlock:'New design unlocked', t_cheat:'DEV: +999 / +999', t_win:'Two Minutes design unlocked',
     d_easy:'EASY', d_medium:'MEDIUM', d_hard:'HARD', d_brutal:'BRUTAL',
     lv_rule:'RULE', lvr_gaps:'Wide gaps', lvr_sand:'Sandstorm', lvr_ceilings:'Low ceilings',
     lvr_noDouble:'No double jump', lvr_noSlow:'No slow fall', lvr_flicker:'Flickering obstacles',
@@ -674,7 +690,7 @@ const I18N = {
     st_time:'TEMPS', st_score:'SCORE', st_jump:'SAUTS', st_djump:'DOUBLES SAUTS',
     st_slow:'CHUTES LENTES', st_crouch:'ACCROUPIS', st_skill:'COMPÉTENCE', st_att:'ESSAIS',
     p_title:'PAUSE', p_resume:'REPRENDRE', p_restart:'RECOMMENCER', p_quit:'QUITTER',
-    o_again:'RÉESSAYER', o_home:'MENU', o_over:'PARTIE TERMINÉE', o_win:'TU AS SURVÉCU',
+    o_next:'NIVEAU SUIVANT', o_alldone:'TOUS LES NIVEAUX TERMINÉS', o_again:'RÉESSAYER', o_home:'MENU', o_over:'PARTIE TERMINÉE', o_win:'TU AS SURVÉCU',
     o_clear:'NIVEAU RÉUSSI', o_wall:'LE MUR T\'A RATTRAPÉ', o_run:'COURSE TERMINÉE',
     o_best:'RECORD', o_score:'SCORE', o_time:'TEMPS', o_prog:'PROGRESSION',
     set_lang:'Langue', set_sfx:'Effets sonores', set_mus:'Musique',
@@ -686,7 +702,7 @@ const I18N = {
     rot:'Tourne ton appareil',
     t_bought:'Acheté', t_equipped:'Équipé', t_nocoins:'Pas assez de pièces',
     t_noshards:'Pas assez d\'éclats', t_owned:'Déjà obtenu', t_reset:'Progression effacée',
-    t_unlock:'Nouveau design débloqué', t_win:'Design Deux Minutes débloqué',
+    t_unlock:'Nouveau design débloqué', t_cheat:'DEV : +999 / +999', t_win:'Design Deux Minutes débloqué',
     d_easy:'FACILE', d_medium:'MOYEN', d_hard:'DIFFICILE', d_brutal:'BRUTAL',
     lv_rule:'RÈGLE', lvr_gaps:'Grands trous', lvr_sand:'Tempête de sable', lvr_ceilings:'Plafonds bas',
     lvr_noDouble:'Sans double saut', lvr_noSlow:'Sans chute lente', lvr_flicker:'Obstacles clignotants',
@@ -1333,17 +1349,25 @@ const Game = {
     hold(document.getElementById('tRight'), ()=>this.lane(1));
     document.getElementById('btnSkill').addEventListener('pointerdown', e=>{e.preventDefault();this.useSkill();});
 
-    // canvas halves as a fallback on touch
+    // canvas halves as a fallback on touch, plus swipe for lanes
+    let sw = null;
     this.cv.addEventListener('pointerdown', e=>{
       if (this.state!=='run' || e.pointerType==='mouse') return;
       const rect = this.cv.getBoundingClientRect();
       const rel = (e.clientX-rect.left)/rect.width;
-      const lefty = Save.d.set.lefty;
-      const crouchSide = lefty ? rel>0.5 : rel<0.5;
+      sw = { x:e.clientX, used:false };
+      if (this.inColumns) return;                  // lane world: swipe or arrows
+      const crouchSide = Save.d.set.lefty ? rel>0.5 : rel<0.5;
       if (crouchSide) this.setCrouch(true); else { this.jumpHeld=true; this.pressJump(); }
     });
+    this.cv.addEventListener('pointermove', e=>{
+      if (!sw || sw.used || !this.inColumns) return;
+      const dx = e.clientX - sw.x;
+      if (Math.abs(dx) > 34){ this.lane(dx>0?1:-1); sw.used=true; }
+    });
     ['pointerup','pointercancel'].forEach(ev=>this.cv.addEventListener(ev,()=>{
-      this.jumpHeld=false; this.setCrouch(false);
+      if (sw && this.inColumns && !sw.used){ this.jumpHeld=true; this.pressJump(); this.jumpHeld=false; }
+      sw = null; this.jumpHeld=false; this.setCrouch(false);
     }));
   },
 
@@ -1385,7 +1409,7 @@ const Game = {
       by: GY, vy:0, h:CFG.R*2, targetH:CFG.R*2, grounded:true, jumps:0, maxJumps:2,
       rot:0, screenX:CFG.PLAYER_X, sqX:1, sqY:1, gliding:false, glideT:0,
       crouch:false, alive:true, invuln:0, fadeT:0, tripleT:0, dashT:0, cleanseT:0,
-      gumT:0, gumCd:0, coyote:0, lane:1, laneX:CFG.PLAYER_X, dead:false, trail:[]
+      gumT:0, gumCd:0, coyote:0, jumpLock:0, jumpBuf:0, lane:1, laneX:CFG.PLAYER_X, dead:false, trail:[]
     };
     if (worldById(worldId).mech==='columns'){
       this.p.lane = 1;
@@ -1523,8 +1547,12 @@ const Game = {
     if (p.crouch) this.setCrouch(false);
     const maxJ = p.tripleT>0 ? 3 : (this.rules.noDouble || this.worldId==='malik' ? 1 : 2);
     if (p.jumps >= maxJ) return;
+    // a mashed second tap used to overwrite the first jump's velocity and leave
+    // you LOWER than a single jump, with both jumps spent. Ignore it instead.
+    if (p.jumpLock > 0){ p.jumpBuf = 0.16; return; }   // remember it, fire it the moment we can
     const first = p.jumps===0 && (p.grounded || p.coyote>0);
-    p.vy = -(first ? CFG.JUMP : CFG.DJUMP);
+    p.vy = Math.min(p.vy, -(first ? CFG.JUMP : CFG.DJUMP));   // always a boost, never a brake
+    p.jumpLock = 0.08;
     p.jumps++; p.grounded=false; p.gliding=false; p.coyote=0;
     p.sqX = 0.82; p.sqY = 1.2;
     if (first){ this.stats.jumps++; Audio2.sfx('jump'); this.puff(6,'#000'); }
@@ -1661,7 +1689,13 @@ const Game = {
     this.score += dt*this.spd*115 * (this.mode==='chal'?1:0.6);
 
     /* ---- timers ---- */
-    ['fadeT','tripleT','dashT','cleanseT','invuln','gumCd'].forEach(k=>{ if(p[k]>0) p[k]=Math.max(0,p[k]-dt); });
+    ['fadeT','tripleT','dashT','cleanseT','invuln','gumCd','jumpLock'].forEach(k=>{ if(p[k]>0) p[k]=Math.max(0,p[k]-dt); });
+
+    /* a jump tapped during the lockout fires as soon as the lockout clears */
+    if (p.jumpBuf>0){
+      p.jumpBuf -= dt;
+      if (p.jumpLock<=0){ p.jumpBuf=0; this.pressJump(); }
+    }
 
     /* coyote time — a hair of grace after walking off a ledge */
     if (p.grounded) p.coyote = 0.09;
@@ -1722,7 +1756,7 @@ const Game = {
     this.worldTick(dt, px);
 
     /* ---- barrier ---- */
-    const target = (this.inColumns? this.laneCenter(0)-40 : CFG.PLAYER_X) - CFG.BARRIER_GAP;
+    const target = this.inColumns ? this.laneEdges()[0]-56 : CFG.PLAYER_X - CFG.BARRIER_GAP;
     // eases in quickly at the start of a run, falls back slowly once it has gained ground
     const ease = this.barrierX < target ? 3.2 : 0.85;
     this.barrierX += (target-this.barrierX)*Math.min(1,dt*ease);
@@ -2426,20 +2460,18 @@ const Game = {
       const e = this.fill<1 ? 1-Math.pow(1-this.fill,3) : 1;
       bx = lerp(this.barrierX, W+40, e);
     }
-    if (bx<-40) return;
+    if (bx<-60) return;
+    const amp = this.state==='run'?7:2;
+    const T=-60, B=H+60;                    // overshoot both edges so there is no seam
     x.save();
     x.fillStyle='#000';
     x.beginPath();
-    x.moveTo(-10,-10); x.lineTo(bx,-10);
-    const amp = this.state==='run'?7:2;
-    for(let y=-10;y<=H+10;y+=18){
-      x.lineTo(bx+Math.sin(y*0.06+this.t*6)*amp, y);
-    }
-    x.lineTo(-10,H+10); x.closePath(); x.fill();
-    // edge glow
+    x.moveTo(-60,T); x.lineTo(bx,T);
+    for(let y=T;y<=B;y+=16) x.lineTo(bx+Math.sin(y*0.06+this.t*6)*amp, y);
+    x.lineTo(-60,B); x.closePath(); x.fill();
     x.strokeStyle='rgba(255,42,23,.5)'; x.lineWidth=2;
     x.beginPath();
-    for(let y=-10;y<=H+10;y+=18) y===-10?x.moveTo(bx,y):x.lineTo(bx+Math.sin(y*0.06+this.t*6)*amp,y);
+    for(let y=T;y<=B;y+=16) y===T?x.moveTo(bx,y):x.lineTo(bx+Math.sin(y*0.06+this.t*6)*amp,y);
     x.stroke();
     x.restore();
   },
@@ -2585,6 +2617,7 @@ const UI = {
     document.getElementById('btnResume').addEventListener('click',()=>this.resume());
     document.getElementById('btnRestart').addEventListener('click',()=>this.restart());
     document.getElementById('btnQuit').addEventListener('click',()=>{ Game.quit(); this.go('home'); });
+    document.getElementById('btnNext').addEventListener('click',()=>this.nextLevel());
     document.getElementById('btnAgain').addEventListener('click',()=>this.restart());
     document.getElementById('btnHome').addEventListener('click',()=>{ Game.quit(); this.go('home'); });
     document.getElementById('btnReset').addEventListener('click',()=>this.doReset());
@@ -2884,6 +2917,13 @@ const UI = {
   },
 
   /* ---------- game over ---------- */
+  nextLevel(){
+    if (!Game.level) return;
+    const nx = LEVELS.find(l=>l.n===Game.level.n+1);
+    if (!nx){ Game.quit(); this.go('levels'); return; }
+    this.hideAll();
+    Game.startLevel(nx);
+  },
   showOver(kind){
     const T_ = k=>T(k);
     let title, kick;
@@ -2911,8 +2951,16 @@ const UI = {
     if (Game.runShards) cells.push(['✦',Game.runShards]);
     st.innerHTML=cells.map(c=>`<div>${c[0]}<b>${c[1]}</b></div>`).join('');
 
+    // straight into the next level after a clear — no trip back to the list
+    const nextBtn = document.getElementById('btnNext');
+    const hasNext = kind==='clear' && Game.level && LEVELS.some(l=>l.n===Game.level.n+1);
+    nextBtn.classList.toggle('hide', !hasNext);
+    if (kind==='clear' && Game.level && !hasNext)
+      document.getElementById('overKick').textContent = T_('o_alldone');
+
     this.showHUD(false);
     document.getElementById('over').classList.add('show');
+    (hasNext ? nextBtn : document.getElementById('btnAgain')).focus?.();
     if (Game.newDesign){ Game.newDesign=false; setTimeout(()=>toast(T('t_win')),700); }
   }
 };
@@ -2932,6 +2980,27 @@ const LEVEL_NAMES = {
   l11:{en:'Bubblewrapped',fr:'Empapillonné'},
   l12:{en:'MALIK',fr:'MALIK'},
 };
+
+/* dev code: tap M three times inside 800ms for 999 of each currency */
+(()=>{
+  let taps=[];
+  addEventListener('keydown',e=>{
+    if (e.code!=='KeyM' || e.repeat) return;
+    const now=Date.now();
+    taps=taps.filter(t=>now-t<800); taps.push(now);
+    if (taps.length>=3){
+      taps=[];
+      Save.d.coins=(Save.d.coins||0)+999;
+      Save.d.shards=(Save.d.shards||0)+999;
+      Save.save();
+      try{ Audio2.sfx('coin'); }catch(_){}
+      UI.refreshHome();
+      if (document.getElementById('store').classList.contains('show')) UI.buildStore();
+      if (document.getElementById('locker').classList.contains('show')) UI.buildLocker();
+      toast(T('t_cheat'));
+    }
+  });
+})();
 
 addEventListener('DOMContentLoaded',()=>UI.init());
 
