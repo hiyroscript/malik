@@ -279,6 +279,56 @@ body.tight #speedTag{font-size:20px}
 .skillBtn.active #cdRing circle{stroke:#7be3ff}
 .skillBtn.auto{opacity:.85;cursor:default}
 
+.stars{display:flex;gap:2px;justify-content:flex-end;font-size:11px;line-height:1;margin:3px 0}
+.stars span{color:rgba(255,255,255,.16)}
+.stars span.on{color:var(--gold)}
+.overStars{display:none}
+.overStars.show{display:block;margin:0 0 18px}
+.overStars>span{display:inline-block;font-size:clamp(30px,7cqh,56px);color:rgba(255,255,255,.14);
+  margin:0 6px;transform:scale(.4);opacity:0;animation:starPop .5s cubic-bezier(.2,1.5,.4,1) both}
+.overStars>span.on{color:var(--gold);text-shadow:0 0 22px rgba(255,196,66,.65)}
+@keyframes starPop{to{transform:scale(1);opacity:1}}
+.starWhy{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.starWhy em{font-family:var(--mono);font-style:normal;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.28)}
+.starWhy em.on{color:var(--gold)}
+
+#confirm{display:none;background:rgba(0,0,0,.78);z-index:70}
+#confirm.show{display:grid;place-items:center;animation:fadeIn .16s ease both}
+.cfName{font-family:var(--disp);font-size:clamp(20px,5cqh,34px);text-transform:uppercase;margin:6px 0 2px}
+.cfCost{font-family:var(--mono);font-size:13px;letter-spacing:.18em;color:var(--gold)}
+.cfHave{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);margin:4px 0 16px}
+#nextWorld{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--dim);margin-bottom:3px}
+/* the language picker was full-screen sized; it only needs to hold two buttons */
+#lang .panel{width:min(78%,330px);padding:18px}
+#lang .panel h2{font-size:clamp(16px,4cqh,24px);margin-bottom:10px}
+#lang .mbtn{padding:9px 14px;font-size:13px}
+
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 12px;border-bottom:1px solid var(--line)}
+.tab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;padding:8px 12px;color:var(--dim);
+  border-bottom:2px solid transparent;transition:.14s}
+.tab:hover{color:#fff}
+.tab.on{color:#fff;border-bottom-color:var(--sig)}
+.guideBody{max-height:56cqh;overflow-y:auto;padding-right:6px;display:grid;gap:8px}
+.gHead{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--sig);
+  padding:12px 0 2px;text-transform:uppercase}
+.gCard{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);
+  background:rgba(255,255,255,.02)}
+.gArt{width:132px;height:88px;flex:0 0 132px;border:1px solid var(--line);background:#0d0d0d;
+  image-rendering:auto;border-radius:2px}
+.gText{min-width:0}
+.gText h4{font-family:var(--disp);font-size:clamp(13px,2.6cqh,18px);letter-spacing:.04em;
+  text-transform:uppercase;margin:0 0 4px}
+.gText h4 em{font-family:var(--mono);font-style:normal;font-size:8px;letter-spacing:.16em;
+  color:var(--sig);margin-left:6px}
+.gText p{font-size:11.5px;line-height:1.5;color:var(--dim2,#b9b9b9);margin:0}
+.gMeta{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--gold);margin-right:6px}
+.gLock{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--sig)}
+@container stage (max-width:640px){
+  .gCard{flex-direction:column}
+  .gArt{width:100%;flex:0 0 auto;height:74px}
+}
+
 /* ---------- countdown ---------- */
 #countdown{position:absolute;inset:0;display:grid;place-items:center;z-index:30;pointer-events:none;
   background:rgba(0,0,0,.35)}
@@ -319,12 +369,12 @@ body.tight #speedTag{font-size:20px}
   <!-- ================= HUD ================= -->
   <div id="hud" class="hide">
     <div id="hudLeft">
+      <div id="nextWorld" class="hide">—</div>
       <div id="worldTag"><span class="dot"></span><span id="worldName">BLANK</span></div>
       <div id="statBox">
         <div class="row"><span data-i18n="st_time">TIME</span><b id="sTime">0.0</b></div>
         <div class="row"><span data-i18n="st_score">SCORE</span><b id="sScore">0</b></div>
         <div class="row"><span data-i18n="st_jump">JUMPS</span><b id="sJump">0</b></div>
-        <div class="row"><span data-i18n="st_djump">DOUBLE JUMPS</span><b id="sDjump">0</b></div>
         <div class="row"><span data-i18n="st_slow">SLOW FALLS</span><b id="sSlow">0</b></div>
         <div class="row"><span data-i18n="st_crouch">CROUCHES</span><b id="sCrouch">0</b></div>
         <div class="row"><span data-i18n="st_skill">SKILL</span><b id="sSkill">—</b></div>
@@ -386,7 +436,8 @@ body.tight #speedTag{font-size:20px}
         <button class="mrow" data-go="modes"><span class="idx">▶</span><span data-i18n="m_play">PLAY</span></button>
         <button class="mrow" data-go="store"><span class="idx">◈</span><span data-i18n="m_store">STORE</span></button>
         <button class="mrow" data-go="locker"><span class="idx">▣</span><span data-i18n="m_locker">LOCKER</span></button>
-        <button class="mrow" data-go="settings"><span class="idx">⚙</span><span data-i18n="m_set">SETTINGS</span></button>
+        <button class="mrow" data-go="guide"><span class="idx">◎</span><span data-i18n="m_guide">DISCOVER</span></button>
+        <button class="mrow" data-go="settings"><span class="idx">⧉</span><span data-i18n="m_set">SETTINGS</span></button>
       </nav>
     </div>
     <div class="homeFoot"><span data-i18n="h_coins">COINS</span> <b id="homeCoins">0</b> · <span data-i18n="h_shards">SHARDS</span> <b id="homeShards">0</b></div>
@@ -489,6 +540,7 @@ body.tight #speedTag{font-size:20px}
     <div class="overWrap">
       <div class="overKick" id="overKick">RUN ENDED</div>
       <h2 class="overTitle" id="overTitle">GAME OVER</h2>
+      <div class="overStars" id="overStars"></div>
       <div class="overStats" id="overStats"></div>
       <div class="btnRow">
         <button class="mbtn" id="btnNext" data-i18n="o_next">NEXT LEVEL</button>
@@ -499,6 +551,31 @@ body.tight #speedTag{font-size:20px}
   </section>
 
   <div id="toast"></div>
+</div>
+<section id="guide" class="screen">
+  <div class="panel wide">
+    <button class="back" data-go="home">‹</button>
+    <h2 data-i18n="g_title">DISCOVER</h2>
+    <div class="tabs" id="guideTabs">
+      <button class="tab on" data-tab="basics" data-i18n="g_basics">BASICS</button>
+      <button class="tab" data-tab="worlds" data-i18n="g_worlds">WORLDS</button>
+      <button class="tab" data-tab="obst" data-i18n="g_obst">OBSTACLES</button>
+      <button class="tab" data-tab="skills" data-i18n="g_skills">SKILLS</button>
+    </div>
+    <div class="guideBody" id="guideBody"></div>
+  </div>
+</section>
+<div class="screen" id="confirm">
+  <div class="panel narrow">
+    <h2 data-i18n="cf_title">CONFIRM PURCHASE</h2>
+    <div class="cfName" id="cfName">—</div>
+    <div class="cfCost" id="cfCost">—</div>
+    <div class="cfHave" id="cfHave">—</div>
+    <div class="btnRow">
+      <button class="mbtn" id="cfYes" data-i18n="cf_yes">BUY</button>
+      <button class="mbtn ghost" id="cfNo" data-i18n="cf_no">CANCEL</button>
+    </div>
+  </div>
 </div>
 <div id="rotate" class="hide"><div>↻<br><span data-i18n="rot">Turn your device sideways</span></div></div>
 </div>
@@ -519,13 +596,15 @@ const CFG = {
   GROUND_Y: 468,          // top of the floor = 9 blocks of air above it
   PX: 430,                // px/sec at 1.00x
   G: 2840,                // gravity
-  JUMP: 860,              // apex 130px = 2.5 blocks
-  DJUMP: 780,
+  JUMP: 945,              // apex 157px = 3.0 blocks — one jump has to do everything now
+  DJUMP: 780,          // only reachable through the Double Jump skill
+  SLOW_DELAY: 0.18,       // how long you must keep holding, once falling, before it engages
   SLOW_G: 0.30,           // gravity multiplier while gliding
   SLOW_MAX: 260,          // terminal velocity while gliding
   R: 26,                  // player radius — one block across
   PLAYER_X: 260,          // fixed screen x
   MAX_SURVIVE: 120,       // seconds to hold at 2.00x to win
+  ORB_POWER: 1090,        // launch orbs throw you ~4 blocks, and cost no jump
   BARRIER_GAP: 250,       // how far the wall trails the player
   BARRIER_CATCHUP: 62,    // px/s the wall closes when player is slowed
   COIN_CHANCE: 0.075,
@@ -538,9 +617,9 @@ const SPEED_STEPS = (() => {
   const a = [];
   for (let i = 0; i <= 20; i++) {
     const spd = +(1 + i * 0.05).toFixed(2);
-    // a minute on the first world, five seconds less after every switch,
-    // never dropping under five. At 2.00x the survival clock takes over.
-    const dur = i === 20 ? 9999 : Math.max(5, 60 - i * 5);
+    // 30s on the first world, ten seconds more after every switch.
+    // At 2.00x the survival clock takes over.
+    const dur = i === 20 ? 9999 : 30 + i * 10;
     a.push({ spd, dur });
   }
   return a;
@@ -554,6 +633,31 @@ const COMMIT_TIME = 0.75;
 
 /* ================= WORLDS ================= */
 const WORLDS = [
+  {
+    id: 'kavern', name: 'KAVERN', music: 'kavern.mp3', mech: 'lowgrav', dark:true,
+    pal: { sky1:'#141a2e', sky2:'#05070f', ground:'#26304d', obst:'#4d6ea8',
+           accent:'#7fd0ff', deco:'rgba(127,208,255,.16)', text:'rgba(127,208,255,.13)', hud:'#fff' }
+  },
+  {
+    id: 'verdance', name: 'VERDANCE', music: 'verdance.mp3', mech: 'vines',
+    pal: { sky1:'#dff5d6', sky2:'#8fc98a', ground:'#5f9a4e', obst:'#3f7a37',
+           accent:'#1d4d21', deco:'rgba(29,77,33,.16)', text:'rgba(29,77,33,.14)', hud:'#0d2b12' }
+  },
+  {
+    id: 'glasswing', name: 'GLASSWING', music: 'glasswing.mp3', mech: 'mirror',
+    pal: { sky1:'#f3ecff', sky2:'#c9b6f0', ground:'#e8dcff', obst:'#b79bea',
+           accent:'#5b2fa8', deco:'rgba(91,47,168,.15)', text:'rgba(91,47,168,.13)', hud:'#2c1257' }
+  },
+  {
+    id: 'cinder', name: 'CINDER', music: 'cinder.mp3', mech: 'ash', dark:true,
+    pal: { sky1:'#40120a', sky2:'#120303', ground:'#3a1108', obst:'#8f3311',
+           accent:'#ff7a26', deco:'rgba(255,122,38,.18)', text:'rgba(255,122,38,.14)', hud:'#fff' }
+  },
+  {
+    id: 'nullstate', name: 'NULLSTATE', music: 'nullstate.mp3', mech: 'stutter', dark:true,
+    pal: { sky1:'#101010', sky2:'#000000', ground:'#1b1b1b', obst:'#d8d8d8',
+           accent:'#00e5b0', deco:'rgba(0,229,176,.16)', text:'rgba(0,229,176,.13)', hud:'#fff' }
+  },
   {
     id: 'blank', name: 'BLANK', music: 'blank.mp3', mech: 'none',
     pal: { sky1:'#fdfdfd', sky2:'#dcdcdc', ground:'#ffffff', obst:'#ffffff',
@@ -590,7 +694,9 @@ const worldById = id => WORLDS.find(w => w.id === id) || WORLDS[0];
 /* ================= DESIGNS =================
    draw(g, r, t) — g is translated to the ball centre and already clipped
    to a circle of radius r. t = seconds (for animated designs). */
-const PRICE = { common:15, rare:40, epic:90, legendary:180, exclusive:0 };
+/* A good run nets roughly 6-14 coins, so a common should be one or two runs
+   and a legendary a genuine goal rather than a month of grinding. */
+const PRICE = { common:25, rare:70, epic:160, legendary:340, exclusive:0 };
 
 function fillAll(g,r,c){ g.fillStyle=c; g.fillRect(-r,-r,r*2,r*2); }
 function band(g,r,y,h,c){ g.fillStyle=c; g.fillRect(-r,y,r*2,h); }
@@ -645,9 +751,9 @@ const SKILLS = [
   { id:'fade',    icon:'◍', cost:1, dur:2,    cd:15, trigger:'key',
     name:{en:'Fade',fr:'Estompe'},
     desc:{en:'Turn translucent and pass through obstacles for 2s. 15s cooldown.',fr:'Devient translucide et traverse les obstacles pendant 2 s. Recharge 15 s.'} },
-  { id:'triple',  icon:'⇈', cost:1, dur:5,    cd:10, trigger:'jump',
-    name:{en:'Triple Jump',fr:'Triple Saut'},
-    desc:{en:'A third mid-air jump for 5s. Fires from the jump control. 10s cooldown.',fr:'Un troisième saut aérien pendant 5 s. Se déclenche avec le saut. Recharge 10 s.'} },
+  { id:'double',  icon:'⤊', cost:1, dur:0,    cd:8, trigger:'jump',
+    name:{en:'Double Jump',fr:'Double Saut'},
+    desc:{en:'You only get one jump. This grants a second in mid-air, then recharges. Fires from the jump control. 8s cooldown.',fr:'Tu n\'as qu\'un saut. Celle-ci en accorde un second en l\'air, puis recharge. Se déclenche avec le saut. Recharge 8 s.'} },
   { id:'revive',  icon:'✚', cost:1, dur:0,    cd:30, trigger:'auto',
     name:{en:'Revive',fr:'Réanimation'},
     desc:{en:'Fires by itself on death. No button. 30s cooldown. Cannot save you from the wall.',fr:'S\'active seule à la mort. Aucun bouton. Recharge 30 s. Ne protège pas du mur.'} },
@@ -661,25 +767,129 @@ const SKILLS = [
 /* rebindable keyboard controls */
 const DEFAULT_KEYS = {
   jump:'Space', jumpAlt:'KeyW', crouch:'KeyS', crouchAlt:'ArrowDown',
-  skill:'KeyP', laneLeft:'KeyA', laneRight:'KeyD', pause:'Escape'
+  skill:'KeyP', skillAlt:'ArrowRight', laneLeft:'KeyA', laneRight:'KeyD', pause:'Escape'
 };
-const KEY_ACTIONS = ['jump','jumpAlt','crouch','crouchAlt','skill','laneLeft','laneRight','pause'];
+const KEY_ACTIONS = ['jump','jumpAlt','crouch','crouchAlt','skill','skillAlt','laneLeft','laneRight','pause'];
+/* ============================================================
+   HOW TO PLAY — reference content.
+   Keyed off the real world ids, mech names and pattern ids, so a world or
+   obstacle that exists in the game always has an entry here to match.
+   ============================================================ */
+
+/* what each world mechanic actually does to you */
+const MECH_INFO = {
+  none:    {en:'No twist. Common obstacles only — learn the rhythm here.',
+            fr:'Aucune particularité. Obstacles communs seulement — apprends le rythme ici.'},
+  sand:    {en:'A sandstorm rolls across the screen and hides what is coming. Cleanse blows it away.',
+            fr:'Une tempête de sable masque ce qui arrive. Purge la dissipe.'},
+  flicker: {en:'Obstacles blink in and out on their own rhythm. They still hurt while invisible, and Cleanse cannot fix it.',
+            fr:'Les obstacles clignotent à leur propre rythme. Ils blessent même invisibles, et Purge n\'y peut rien.'},
+  columns: {en:'The world rebuilds into three columns. Blocks fall from above and bars sweep across. Move between columns, crouch under bars. No double jump, no slow fall.',
+            fr:'Le monde se reconstruit en trois colonnes. Des blocs tombent et des barres balaient. Change de colonne, accroupis-toi sous les barres. Pas de double saut ni de chute lente.'},
+  flip:    {en:'The whole world turns upside down. Everything still controls the same way — your eyes are the problem, not the buttons.',
+            fr:'Le monde entier est renversé. Les commandes ne changent pas — c\'est ton regard qui doit s\'adapter.'},
+  gum:     {en:'Pink gum on the floor roots you in place. You keep losing ground to the wall while stuck. Cleanse frees you.',
+            fr:'La gomme rose au sol te bloque. Tu perds du terrain face au mur. Purge te libère.'},
+  lowgrav: {en:'Gravity drops to about two thirds. Jumps float much further, so commit earlier than feels right.',
+            fr:'La gravité tombe aux deux tiers. Les sauts planent bien plus loin : engage-toi plus tôt.'},
+  vines:   {en:'Vines hang from the ceiling. Brushing one slows you down and hands the wall free ground.',
+            fr:'Des lianes pendent du plafond. Les frôler te ralentit et offre du terrain au mur.'},
+  mirror:  {en:'Left and right are swapped. Only matters where you steer, so it bites hardest in column sections.',
+            fr:'Gauche et droite sont inversées. Cela ne compte que là où tu diriges : surtout dans les colonnes.'},
+  ash:     {en:'Burning ash falls and dims the screen. Cleanse clears the air.',
+            fr:'Des cendres tombent et assombrissent l\'écran. Purge dégage l\'air.'},
+  stutter: {en:'Time stutters. The world freezes for a fraction of a second at random, which wrecks any jump you timed by feel.',
+            fr:'Le temps se saccade. Le monde se fige une fraction de seconde au hasard, ce qui ruine les sauts faits à l\'instinct.'},
+};
+
+/* every obstacle you can meet, common or tied to one world */
+const GUIDE_OBSTACLES = [
+  {id:'spikes',      art:'spikes',   scope:'common', name:{en:'Spikes',fr:'Piques'},
+   tip:{en:'Rows of one to four. One jump clears a whole row — aim to land past it, not on it.',fr:'Rangées de une à quatre. Un saut passe toute la rangée — vise après, pas dessus.'}},
+  {id:'gap',         art:'gap',      scope:'common', name:{en:'Gap',fr:'Trou'},
+   tip:{en:'A hole in the floor. Never wider than your jump, but the landing gets long at speed.',fr:'Un trou dans le sol. Jamais plus large qu\'un saut, mais l\'atterrissage s\'allonge avec la vitesse.'}},
+  {id:'doubleGap',   art:'gap2',     scope:'common', name:{en:'Double Gap',fr:'Double Trou'},
+   tip:{en:'Two holes with a small island between. Land on the island, then jump again straight away.',fr:'Deux trous séparés par un îlot. Atterris sur l\'îlot puis resaute aussitôt.'}},
+  {id:'airPlat',     art:'plat',     scope:'common', name:{en:'Ledge',fr:'Plateforme'},
+   tip:{en:'Land on top. Hitting the side kills. Long ones can drift sideways as you cross.',fr:'Atterris dessus. Toucher le côté est fatal. Les longues peuvent dériver.'}},
+  {id:'steps',       art:'steps',    scope:'common', name:{en:'Steps',fr:'Marches'},
+   tip:{en:'Raised ground, one block per step. The face of a step is a wall — jump early.',fr:'Sol surélevé, un bloc par marche. La face est un mur — saute tôt.'}},
+  {id:'ceiling',     art:'ceil',     scope:'common', name:{en:'Low Ceiling',fr:'Plafond Bas'},
+   tip:{en:'Too low to stand under. Crouch. You cannot jump while ducked, so clear threats first.',fr:'Trop bas pour rester debout. Accroupis-toi. Impossible de sauter accroupi.'}},
+  {id:'movers',      art:'mover',    scope:'common', name:{en:'Moving Block',fr:'Bloc Mobile'},
+   tip:{en:'Slides up and down on a fixed cycle. There is always a way past — over it or under it.',fr:'Monte et descend en cycle fixe. Il y a toujours un passage : dessus ou dessous.'}},
+  {id:'orb',         art:'orb',      scope:'common', name:{en:'Launch Orb',fr:'Orbe de Saut'},
+   tip:{en:'Touch it and it throws you four blocks up, and gives your jump back. With only one jump, orbs are how you cross anything big.',fr:'Le toucher te propulse de quatre blocs et rend ton saut. Avec un seul saut, les orbes sont la clé des grands passages.'}},
+  {id:'saw',         art:'saw',      scope:'common', name:{en:'Saw Blade',fr:'Scie'},
+   tip:{en:'Spins in the floor. Jump it. Forgiving hitbox — the teeth are smaller than they look.',fr:'Tourne dans le sol. Saute. La zone de collision est plus petite qu\'elle en a l\'air.'}},
+  {id:'stalactite',  art:'drop',     scope:'common', name:{en:'Stalactite',fr:'Stalactite'},
+   tip:{en:'Hangs from above in a row. Crouch and hold it until the last one has passed.',fr:'Pend du plafond en série. Accroupis-toi jusqu\'à la dernière.'}},
+  {id:'crumble',     art:'crumble',  scope:'common', name:{en:'Crumbling Tiles',fr:'Dalles Friables'},
+   tip:{en:'They fall away under your weight. Keep moving — standing still drops you.',fr:'Elles s\'effondrent sous ton poids. Continue — t\'arrêter te fait tomber.'}},
+  {id:'piston',      art:'piston',   scope:'common', name:{en:'Piston Spike',fr:'Pique à Piston'},
+   tip:{en:'Pops out of the floor on a cycle. Read the rhythm and cross while it is down.',fr:'Sort du sol par cycles. Lis le rythme et passe quand elle est rentrée.'}},
+  {id:'pillars',     art:'pillars',  scope:'common', name:{en:'Pillars',fr:'Piliers'},
+   tip:{en:'Narrow posts with gaps between. Short precise hops, not one big jump.',fr:'Poteaux étroits espacés. Petits sauts précis, pas un grand.'}},
+  {id:'tunnel',      art:'tunnel',   scope:'common', name:{en:'Tunnel',fr:'Tunnel'},
+   tip:{en:'Crouch, stand, crouch. The standing gap in the middle is your only chance to jump.',fr:'Accroupi, debout, accroupi. Le trou du milieu est ta seule occasion de sauter.'}},
+  {id:'lift',        art:'lift',     scope:'common', name:{en:'Lift',fr:'Ascenseur'},
+   tip:{en:'A slab over a pit that rides up and down. Board it low, ride it, step off high.',fr:'Une dalle au-dessus du vide qui monte et descend. Monte en bas, descends en haut.'}},
+  {id:'spikeWall',   art:'wall',     scope:'common', name:{en:'Spike Wall',fr:'Mur de Piques'},
+   tip:{en:'Too tall to jump. There is always an orb in front of it — that is the way over.',fr:'Trop haut pour sauter. Il y a toujours un orbe devant : c\'est le passage.'}},
+  {id:'zigzag',      art:'zigzag',   scope:'common', name:{en:'Zigzag',fr:'Zigzag'},
+   tip:{en:'Ledges alternating high and low. Ride the tops; the pattern repeats.',fr:'Plateformes hautes et basses en alternance. Reste au sommet ; le motif se répète.'}},
+  {id:'chasm',       art:'chasm',    scope:'common', name:{en:'Chasm',fr:'Gouffre'},
+   tip:{en:'A pit far too wide to jump, with two orbs strung across it. Commit — stopping is fatal.',fr:'Un gouffre bien trop large, avec deux orbes en travers. Engage-toi ; hésiter est fatal.'}},
+  {id:'gumBlob',     art:'gum',      scope:'gum',    name:{en:'Gum Blob',fr:'Chewing-Gum'},
+   tip:{en:'Roots you where you stand: no jump, no skills, and the wall closes in. One hit is survivable, two in a row is not.',fr:'Te cloue sur place : ni saut ni compétence, et le mur avance. Un contact se survit, deux non.'}},
+  {id:'fallBlock',   art:'fall',     scope:'malik',  name:{en:'Falling Block',fr:'Bloc Tombant'},
+   tip:{en:'Drops down one of the three columns. Move to a clear column.',fr:'Tombe dans une des trois colonnes. Change de colonne.'}},
+  {id:'bar',         art:'bar',      scope:'malik',  name:{en:'Sweeping Bar',fr:'Barre Balayante'},
+   tip:{en:'Covers one, two or all three columns. Crouching is the only way under a full-width bar.',fr:'Couvre une, deux ou trois colonnes. S\'accroupir est la seule issue sous une barre complète.'}},
+  {id:'vine',        art:'vine',     scope:'verdance', name:{en:'Hanging Vine',fr:'Liane'},
+   tip:{en:'Brush it and you slow down, losing ground to the wall. Duck or jump past.',fr:'La frôler te ralentit et rapproche le mur. Esquive en sautant ou accroupi.'}},
+];
+
+/* what each skill is actually for */
+const SKILL_COUNTERS = {
+  fade:    {en:'Anything solid: spike walls, staircases, moving blocks. Two seconds is short, so save it for the one thing you know you cannot clear.',
+            fr:'Tout ce qui est solide : murs de piques, escaliers, blocs mobiles. Deux secondes, donc garde-la pour l\'obstacle que tu sais ne pas pouvoir passer.'},
+  double:  {en:'Bad launches, and anything you simply cannot reach in one hop. Since a single jump is all you normally get, this is the most forgiving skill in the game.',
+            fr:'Les mauvais départs et tout ce qui est hors de portée d\'un seul saut. Comme tu n\'as normalement qu\'un saut, c\'est la compétence la plus indulgente du jeu.'},
+  revive:  {en:'Everything except the wall. It fires by itself and gives you the run back — but if the wall catches you, nothing saves it.',
+            fr:'Tout sauf le mur. Elle s\'active seule et te rend la partie — mais si le mur t\'attrape, rien ne la sauve.'},
+  dash:    {en:'Spike rows and long gaps. Bursts you forward through whatever is in the way.',
+            fr:'Les rangées de piques et les longs trous. Te propulse à travers ce qui gêne.'},
+  cleanse: {en:'Anything blocking sight or movement: the Wüste sandstorm, Cinder ash, Chewing-gum, Glasswing mirroring. It cannot touch the Me ni mienai flicker.',
+            fr:'Tout ce qui gêne la vue ou le mouvement : sable de Wüste, cendres de Cinder, gomme, miroir de Glasswing. Sans effet sur le clignotement de Me ni mienai.'},
+};
+
 const skillById = id => SKILLS.find(s => s.id === id) || null;
 
 /* ================= ADVENTURE LEVELS ================= */
 const LEVELS = [
-  {n:1, key:'l1', world:'blank',      spd:1.00, len:42, diff:'easy',   seed:1101, rules:[]},
-  {n:2, key:'l2', world:'blank',      spd:1.10, len:48, diff:'easy',   seed:2202, rules:['gaps']},
-  {n:3, key:'l3', world:'wuste',      spd:1.15, len:52, diff:'easy',   seed:3303, rules:['sand']},
-  {n:4, key:'l4', world:'wuste',      spd:1.25, len:55, diff:'medium', seed:4404, rules:['ceilings','noDouble']},
-  {n:5, key:'l5', world:'menimienai', spd:1.20, len:58, diff:'medium', seed:5505, rules:['flicker']},
-  {n:6, key:'l6', world:'gum',        spd:1.25, len:58, diff:'medium', seed:6606, rules:['gum']},
-  {n:7, key:'l7', world:'wardsback',  spd:1.30, len:60, diff:'medium', seed:7707, rules:['flip']},
-  {n:8, key:'l8', world:'malik',      spd:1.30, len:55, diff:'hard',   seed:8808, rules:['columns']},
-  {n:9, key:'l9', world:'menimienai', spd:1.45, len:64, diff:'hard',   seed:9909, rules:['flicker','noSlow']},
-  {n:10,key:'l10',world:'wardsback',  spd:1.55, len:66, diff:'hard',   seed:1010, rules:['flip','gaps']},
-  {n:11,key:'l11',world:'gum',        spd:1.65, len:70, diff:'brutal', seed:1111, rules:['gum','noSkill']},
-  {n:12,key:'l12',world:'malik',      spd:1.80, len:72, diff:'brutal', seed:1212, rules:['columns','noSkill']},
+  {n:1,  key:'l1',  world:'blank',      spd:1.00, len:40, diff:'easy',   seed:1101, rules:[]},
+  {n:2,  key:'l2',  world:'verdance',   spd:1.05, len:45, diff:'easy',   seed:2202, rules:['vines']},
+  {n:3,  key:'l3',  world:'blank',      spd:1.10, len:48, diff:'easy',   seed:3303, rules:['gaps']},
+  {n:4,  key:'l4',  world:'wuste',      spd:1.15, len:52, diff:'easy',   seed:4404, rules:['sand']},
+  {n:5,  key:'l5',  world:'kavern',     spd:1.15, len:55, diff:'medium', seed:5505, rules:['lowgrav']},
+  {n:6,  key:'l6',  world:'menimienai', spd:1.20, len:56, diff:'medium', seed:6606, rules:['flicker']},
+  {n:7,  key:'l7',  world:'gum',        spd:1.20, len:58, diff:'medium', seed:7707, rules:['sticky']},
+  {n:8,  key:'l8',  world:'wuste',      spd:1.25, len:58, diff:'medium', seed:8808, rules:['ceilings']},
+  {n:9,  key:'l9',  world:'glasswing',  spd:1.25, len:60, diff:'medium', seed:9909, rules:['mirror']},
+  {n:10, key:'l10', world:'wardsback',  spd:1.30, len:60, diff:'hard',   seed:1010, rules:['flip']},
+  {n:11, key:'l11', world:'cinder',     spd:1.35, len:62, diff:'hard',   seed:1111, rules:['ash']},
+  {n:12, key:'l12', world:'malik',      spd:1.30, len:55, diff:'hard',   seed:1212, rules:['columns']},
+  {n:13, key:'l13', world:'blank',      spd:1.45, len:64, diff:'hard',   seed:1313, rules:['noSlow']},
+  {n:14, key:'l14', world:'nullstate',  spd:1.45, len:66, diff:'hard',   seed:1414, rules:['stutter']},
+  {n:15, key:'l15', world:'kavern',     spd:1.50, len:66, diff:'hard',   seed:1515, rules:['lowgrav','gaps']},
+  {n:16, key:'l16', world:'menimienai', spd:1.55, len:68, diff:'brutal', seed:1616, rules:['flicker','noSlow']},
+  {n:17, key:'l17', world:'gum',        spd:1.55, len:70, diff:'brutal', seed:1717, rules:['sticky','ceilings']},
+  {n:18, key:'l18', world:'glasswing',  spd:1.60, len:70, diff:'brutal', seed:1818, rules:['mirror','gaps']},
+  {n:19, key:'l19', world:'cinder',     spd:1.65, len:72, diff:'brutal', seed:1919, rules:['ash','noOrbs']},
+  {n:20, key:'l20', world:'wardsback',  spd:1.70, len:74, diff:'brutal', seed:2020, rules:['flip','flicker']},
+  {n:21, key:'l21', world:'nullstate',  spd:1.75, len:76, diff:'brutal', seed:2121, rules:['stutter','gaps']},
+  {n:22, key:'l22', world:'malik',      spd:1.80, len:78, diff:'brutal', seed:2222, rules:['columns']},
 ];
 
 /* ================= I18N ================= */
@@ -701,6 +911,26 @@ const I18N = {
     o_next:'NEXT LEVEL', o_alldone:'ALL LEVELS CLEARED', o_again:'TRY AGAIN', o_home:'MENU', o_over:'GAME OVER', o_win:'YOU SURVIVED',
     o_clear:'LEVEL CLEAR', o_wall:'THE WALL CAUGHT YOU', o_run:'RUN ENDED',
     o_best:'BEST', o_score:'SCORE', o_time:'TIME', o_prog:'PROGRESS',
+    m_guide:'DISCOVER', g_title:'DISCOVER',
+    g_basics:'BASICS', g_worlds:'WORLDS', g_obst:'OBSTACLES', g_skills:'SKILLS',
+    g_common:'COMMON — these turn up in every world',
+    g_special:'WORLD-SPECIFIC — only in the world named',
+    g_only:'Only here:', g_good:'Best against:', g_locked:'Not owned yet',
+    g_dur:'Lasts %1 · recharges %2 · ',
+    g_b1t:'The run', g_b1:'You move forward on your own. Everything you do is timing. Dying restarts the attempt, not your progress.',
+    g_b2t:'Jumping', g_b2:'You get one jump. That is the whole game — read the gap and commit. Keep holding the jump control for a moment once you are falling and you slow your descent — a brief hold does nothing, so it never fires by accident. Buy the Double Jump skill if you want a second jump.',
+    g_b3t:'Crouching', g_b3:'Hold crouch to squash into a bar and slide under low ceilings. You cannot jump while ducked.',
+    g_b4t:'The black wall', g_b4:'It trails you the whole run. It only gains ground when something slows you down, and if it reaches you nothing can revive you.',
+    g_b5t:'Coins and shards', g_b5:'Gold coins buy designs in the store. Blue shards are far rarer and buy skills. In Adventure a coin you have taken never comes back.',
+    g_b6t:'Speed', g_b6:'In Two Minutes the speed climbs from 1.00x to 2.00x and the world changes with it. Obstacles spread out as you get faster, because they arrive sooner.',
+    cf_title:'CONFIRM PURCHASE', cf_yes:'BUY', cf_no:'CANCEL', cf_have:'You have %',
+    cur_coins:'COINS', cur_shards:'SHARDS', hud_next:'NEXT WORLD',
+    set_random:'Random design each run',
+    lvr_noOrbs:'No launch orbs', lvr_vines:'Grabbing vines', lvr_lowgrav:'Low gravity', lvr_mirror:'Mirrored input',
+    lvr_ash:'Falling ash', lvr_stutter:'Stuttering time', lvr_sticky:'Sticky ground',
+    lvr_columns:'Three columns',
+    star_1:'Reached the end', star_2:'No skill used', star_3:'All coins collected',
+    key_skillAlt:'Use skill (double-press)',
     set_keys:'CONTROLS', key_jump:'Jump', key_jumpAlt:'Jump (alt)', key_crouch:'Crouch',
     key_crouchAlt:'Crouch (alt)', key_skill:'Use skill', key_laneLeft:'Move left',
     key_laneRight:'Move right', key_pause:'Pause', key_press:'PRESS A KEY',
@@ -717,7 +947,7 @@ const I18N = {
     t_unlock:'New design unlocked', t_cheat:'DEV: +999 / +999', t_win:'Two Minutes design unlocked',
     d_easy:'EASY', d_medium:'MEDIUM', d_hard:'HARD', d_brutal:'BRUTAL',
     lv_rule:'RULE', lvr_gaps:'Wide gaps', lvr_sand:'Sandstorm', lvr_ceilings:'Low ceilings',
-    lvr_noDouble:'No double jump', lvr_noSlow:'No slow fall', lvr_flicker:'Flickering obstacles',
+    lvr_noOrbs:'No launch orbs', lvr_noSlow:'No slow fall', lvr_flicker:'Flickering obstacles',
     lvr_gum:'Sticky ground', lvr_flip:'World flipped', lvr_columns:'Three columns', lvr_noSkill:'No skills',
   },
   fr:{
@@ -737,6 +967,26 @@ const I18N = {
     o_next:'NIVEAU SUIVANT', o_alldone:'TOUS LES NIVEAUX TERMINÉS', o_again:'RÉESSAYER', o_home:'MENU', o_over:'PARTIE TERMINÉE', o_win:'TU AS SURVÉCU',
     o_clear:'NIVEAU RÉUSSI', o_wall:'LE MUR T\'A RATTRAPÉ', o_run:'COURSE TERMINÉE',
     o_best:'RECORD', o_score:'SCORE', o_time:'TEMPS', o_prog:'PROGRESSION',
+    m_guide:'DÉCOUVRIR', g_title:'DÉCOUVRIR',
+    g_basics:'BASES', g_worlds:'MONDES', g_obst:'OBSTACLES', g_skills:'COMPÉTENCES',
+    g_common:'COMMUNS — présents dans tous les mondes',
+    g_special:'SPÉCIFIQUES — seulement dans le monde indiqué',
+    g_only:'Seulement ici :', g_good:'Efficace contre :', g_locked:'Pas encore débloquée',
+    g_dur:'Dure %1 · recharge %2 · ',
+    g_b1t:'La partie', g_b1:'Tu avances tout seul. Tout est une question de timing. Mourir relance la tentative, pas ta progression.',
+    g_b2t:'Sauter', g_b2:'Tu n\'as qu\'un seul saut. Tout le jeu est là : lis le trou et engage-toi. Continue de maintenir le saut un instant après avoir commencé à tomber et tu ralentis ta chute — un appui bref ne fait rien, donc cela ne se déclenche jamais par accident. Achète la compétence Double Saut pour un second saut.',
+    g_b3t:'S\'accroupir', g_b3:'Maintiens accroupi pour passer sous les plafonds bas. Impossible de sauter accroupi.',
+    g_b4t:'Le mur noir', g_b4:'Il te suit toute la partie. Il ne gagne du terrain que si quelque chose te ralentit, et s\'il t\'atteint aucune réanimation ne fonctionne.',
+    g_b5t:'Pièces et éclats', g_b5:'Les pièces dorées achètent les designs. Les éclats bleus, bien plus rares, achètent les compétences. En Aventure, une pièce prise ne revient jamais.',
+    g_b6t:'Vitesse', g_b6:'En Deux Minutes la vitesse monte de 1,00× à 2,00× et le monde change avec elle. Les obstacles s\'espacent car ils arrivent plus vite.',
+    cf_title:'CONFIRMER L\'ACHAT', cf_yes:'ACHETER', cf_no:'ANNULER', cf_have:'Tu as %',
+    cur_coins:'PIÈCES', cur_shards:'ÉCLATS', hud_next:'MONDE SUIVANT',
+    set_random:'Design aléatoire à chaque partie',
+    lvr_noOrbs:'Sans orbes', lvr_vines:'Lianes agrippantes', lvr_lowgrav:'Gravité faible', lvr_mirror:'Commandes inversées',
+    lvr_ash:'Pluie de cendres', lvr_stutter:'Temps saccadé', lvr_sticky:'Sol collant',
+    lvr_columns:'Trois colonnes',
+    star_1:'Arrivé au bout', star_2:'Aucune compétence utilisée', star_3:'Toutes les pièces récupérées',
+    key_skillAlt:'Compétence (double appui)',
     set_keys:'COMMANDES', key_jump:'Saut', key_jumpAlt:'Saut (alt)', key_crouch:'Accroupi',
     key_crouchAlt:'Accroupi (alt)', key_skill:'Utiliser la compétence', key_laneLeft:'Aller à gauche',
     key_laneRight:'Aller à droite', key_pause:'Pause', key_press:'APPUIE SUR UNE TOUCHE',
@@ -753,7 +1003,7 @@ const I18N = {
     t_unlock:'Nouveau design débloqué', t_cheat:'DEV : +999 / +999', t_win:'Design Deux Minutes débloqué',
     d_easy:'FACILE', d_medium:'MOYEN', d_hard:'DIFFICILE', d_brutal:'BRUTAL',
     lv_rule:'RÈGLE', lvr_gaps:'Grands trous', lvr_sand:'Tempête de sable', lvr_ceilings:'Plafonds bas',
-    lvr_noDouble:'Sans double saut', lvr_noSlow:'Sans chute lente', lvr_flicker:'Obstacles clignotants',
+    lvr_noOrbs:'Sans orbes', lvr_noSlow:'Sans chute lente', lvr_flicker:'Obstacles clignotants',
     lvr_gum:'Sol collant', lvr_flip:'Monde inversé', lvr_columns:'Trois colonnes', lvr_noSkill:'Sans compétences',
   }
 };
@@ -822,6 +1072,9 @@ const DEFAULT_SAVE = {
   adventure:{ unlocked:1, best:{}, cleared:[] },
   totals:{ jumps:0, djumps:0, slows:0, crouches:0, skills:0, runs:0 },
   keys:Object.assign({}, DEFAULT_KEYS),
+  // 'triple' was renamed to 'double' when the base double jump was removed
+
+  randomDesign:false,
   set:{ sfx:true, music:true, musVol:0.7, sfxVol:0.8, pitch:true,
         shake:true, particles:true, flash:false, lefty:false, fps:false }
 };
@@ -836,6 +1089,15 @@ const Save = {
       this.d.adventure = Object.assign(structuredClone(DEFAULT_SAVE.adventure), this.d.adventure||{});
       this.d.totals = Object.assign(structuredClone(DEFAULT_SAVE.totals), this.d.totals||{});
     }catch(e){ this.d = structuredClone(DEFAULT_SAVE); }
+    /* Triple Jump became Double Jump when the base double jump was removed.
+       Anyone who already bought it keeps it under the new id. */
+    if (Array.isArray(this.d.skills) && this.d.skills.includes('triple')){
+      this.d.skills = this.d.skills.filter(s=>s!=='triple');
+      if (!this.d.skills.includes('double')) this.d.skills.push('double');
+      if (this.d.equipSkill==='triple') this.d.equipSkill='double';
+      this.save();
+    }
+    this.d.keys = Object.assign({}, DEFAULT_KEYS, this.d.keys||{});
     if(!this.d.seedId){ this.d.seedId = Math.floor(Math.random()*1e9)+1; this.save(); }
     return this.d;
   },
@@ -996,6 +1258,7 @@ const Audio2 = {
       case 'land':    this.noise(.07,.09,'lowpass',420); break;
       case 'crouch':  this.tone(300,180,.09,'triangle',.09); break;
       case 'uncrouch':this.tone(200,320,.08,'triangle',.07); break;
+      case 'orb':     this.tone(520,1240,.16,'square',.16); this.tone(780,1560,.12,'triangle',.09,.02); break;
       case 'coin':    this.tone(980,980,.07,'square',.13); this.tone(1470,1470,.13,'square',.11,.06); break;
       case 'shard':   this.tone(1240,1240,.07,'triangle',.13); this.tone(1860,2480,.24,'triangle',.11,.06);
                       this.tone(930,930,.3,'sine',.07,.06); break;
@@ -1065,18 +1328,55 @@ const blocks = n => n*B;
 /* obstacle geometry is fixed in blocks, exactly like GD — speed changes the
    jump arc and your reaction window, not the size of anything on screen. */
 const reachBlocks = spd => jumpDist(spd)/B;
+/* Distance needed after clearing an obstacle before the next one can appear:
+   one full arc to get back down, plus the jump lockout, plus a reaction beat.
+   Anything tighter forces a third jump, which most players do not have. */
+/* You jump over the thing and land a full arc later. If the next one sits
+   inside that arc you land on top of it, so the gap must EXCEED the arc.
+   arc*0.46*SPACE_MULT worked out to 0.92*arc, i.e. landing right on it. */
+function landingRun(spd, widthBlocks){
+  // arc + the obstacle + margin. The margin is what stops a landing from
+  // clipping the next thing when the arc rounds up.
+  return (Math.round(reachBlocks(spd)) + widthBlocks + 3)*B;
+}
 
 function ground(o,x,w,top){ o.solids.push({kind:'ground',x,y:top===undefined?GY:top,w,h:CFG.H-(top===undefined?GY:top)+40}); }
 function block(o,x,y,w,h,kind){ o.solids.push({kind:kind||'block',x,y,w,h}); }
+/* a ledge that slides side to side within a block or so */
+function movingBlock(o,x,y,w,h,amp,phase){
+  o.solids.push({kind:'block',x,y,w,h,x0:x,mx:amp,mp:phase});
+}
+/* yellow launch orb — throws you up and does NOT spend a jump */
+function orb(o,x,y){ o.hazards.push({type:'orb',x:x-B/2,y:y-B/2,w:B,h:B,used:false,t:0}); }
 function spike(o,x,base,n){
   n = Math.max(1, n|0);
   // one hazard holding n triangles side by side — spikes never stack upward
   o.hazards.push({type:'spike',x,y:base-SPIKE_H,w:SPIKE_W*n,h:SPIKE_H,n});
 }
+let COIN_MULT = 1;   // adventure levels lay out a real coin route to chase
+/* With no double jump you cannot rescue a bad launch, so everything needs
+   materially more room. Chain-testing showed 2.00x single-jump play failing
+   half its chains at the tight spacing that suits normal play. */
+let SPACE_MULT = 1;
+/* Obstacle SIZES stay fixed in blocks so the game keeps its Geometry Dash
+   chunkiness. Run-ups, landing zones and spacing scale with the jump arc,
+   because with a single jump you cannot correct a launch — at 2.00x the arc is
+   ten blocks and a two-block ledge is not landable. */
+const arcScale = spd => 1 + (spd-1)*0.55;
+const sb = (n, spd) => Math.max(1, Math.round(n*arcScale(spd)))*B;
+/* With a single jump your landing point is fixed by the launch, not chosen.
+   So anything that repeats must sit one arc apart, or you land on top of it. */
+/* Two different needs, and getting them backwards is fatal:
+   - landOn: you mean to land ON the next thing, so it sits one arc away.
+   - clearBy: you jump OVER it and land after, so the next one must be further
+     than a full arc or you land on top of it. 0.92*arc did exactly that. */
+const landOn  = spd => Math.round(reachBlocks(spd))*B;
+const clearBy = (spd, wBlocks) => (Math.round(reachBlocks(spd)) + wBlocks + 1)*B;
+const stride = landOn;
 function coinAt(o,x,y,rng,force){
   const r = rng.next();
-  if (force || r < CFG.COIN_CHANCE) o.picks.push({type:'coin',x,y,r:11,t:rng.range(0,6)});
-  else if (r < CFG.COIN_CHANCE + CFG.SHARD_CHANCE) o.picks.push({type:'shard',x,y,r:11,t:rng.range(0,6)});
+  if (force || r < CFG.COIN_CHANCE*COIN_MULT) o.picks.push({type:'coin',x,y,r:11,t:rng.range(0,6)});
+  else if (r < CFG.COIN_CHANCE*COIN_MULT + CFG.SHARD_CHANCE) o.picks.push({type:'shard',x,y,r:11,t:rng.range(0,6)});
 }
 
 /* ---------------- pattern library ----------------
@@ -1085,7 +1385,7 @@ const PATTERNS = {
 
   /* plain run — breathing room */
   flat(o,x,c){
-    const w = blocks(c.rng.int(3,5));
+    const w = blocks(c.rng.int(2,3));
     ground(o,x,w);
     return w;
   },
@@ -1093,26 +1393,26 @@ const PATTERNS = {
   /* ground spikes, stackable like GD */
   spikes(o,x,c){
     const groups = c.hard ? c.rng.int(2,3) : c.rng.int(1,2);
-    // landing room between rows, in whole blocks, never wider than one arc
-    const gapB = clamp(Math.round(reachBlocks(c.spd)*0.55), 3, 6);
-    let w = blocks(2);
+    let w = blocks(1);
     for (let i=0;i<groups;i++){
       const n = +c.rng.weighted(c.hard ? {1:3,2:4,3:2} : {1:6,2:3});
       spike(o, x+w, GY, n);
       if (c.rng.chance(0.35)) coinAt(o, x+w+SPIKE_W*n/2, GY-SPIKE_H-blocks(1), c.rng);
-      w += blocks(n + gapB);
+      // you must land AND be able to jump again before the next row: leave a
+      // full arc plus the row itself, otherwise it needs a third jump
+      w += blocks(n) + landingRun(c.spd, n) + c.rng.int(1,3)*B;
     }
-    w += blocks(2);
+    w += blocks(1);
     ground(o,x,w);
     return w;
   },
 
   /* a hole in the floor */
   gap(o,x,c){
-    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.62), 2, c.rules.gaps?5:4);
-    const lead = blocks(3);
+    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.48), 2, c.rules.gaps?4:3);
+    const lead = sb(3,c.spd);
     const gw   = blocks(c.rng.int(c.hard?3:2, maxB));
-    const tail = blocks(4);
+    const tail = Math.max(sb(3,c.spd), Math.ceil(reachBlocks(c.spd)*0.7)*B);
     ground(o,x,lead);
     ground(o,x+lead+gw,tail);
     if (c.rng.chance(0.4)) coinAt(o,x+lead+gw/2, GY-blocks(2), c.rng);
@@ -1121,12 +1421,12 @@ const PATTERNS = {
 
   /* two holes with a tiny island — rewards a double jump */
   doubleGap(o,x,c){
-    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.55), 2, 4);
-    const lead = blocks(3);
+    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.34), 2, 3);
+    const lead = sb(2,c.spd);
     const g1   = blocks(c.rng.int(2,maxB));
-    const isle = blocks(2);
+    const isle = Math.max(sb(3,c.spd), Math.round(reachBlocks(c.spd)*0.75)*B);
     const g2   = blocks(c.rng.int(2,maxB));
-    const tail = blocks(4);
+    const tail = Math.max(sb(3,c.spd), Math.ceil(reachBlocks(c.spd)*0.7)*B);
     ground(o,x,lead);
     ground(o,x+lead+g1,isle);
     ground(o,x+lead+g1+isle+g2,tail);
@@ -1136,13 +1436,16 @@ const PATTERNS = {
 
   /* floating platform to land on. sides kill. */
   airPlat(o,x,c){
-    const lead = blocks(3);
-    const pw   = blocks(c.rng.int(2,4));
-    // 2 blocks clears a single jump; 3 needs the double, so only when allowed
-    const ph   = blocks(!c.noDouble && c.rng.chance(0.4) ? 3 : 2);
-    const tail = blocks(4);
+    const lead = sb(3,c.spd);
+    // short stubs through long runways — length is a real difficulty dial now
+    const pw   = sb(+c.rng.weighted({2:3, 3:4, 4:3, 6:2, 8:1}), c.spd);
+    const ph   = blocks(2);          // 2 blocks is inside a single 2.5-block apex
+    const tail = landingRun(c.spd, 2);
     ground(o,x,lead+pw+tail);
-    block(o,x+lead,GY-ph,pw,B/2);
+    // a long ledge can drift; a stub never does, landing on it is hard enough
+    const slides = pw>=blocks(4) && c.rng.chance(c.hard?0.5:0.28);
+    if (slides) movingBlock(o,x+lead,GY-ph,pw,B/2, B*0.55, c.rng.range(0,1));
+    else block(o,x+lead,GY-ph,pw,B/2);
     if (c.rng.chance(0.55)) coinAt(o,x+lead+pw/2, GY-ph-blocks(1), c.rng);
     if (c.hard && c.rng.chance(0.6)) spike(o,x+lead+B,GY,1);
     return lead+pw+tail;
@@ -1151,87 +1454,186 @@ const PATTERNS = {
   /* stepped ground at different heights */
   steps(o,x,c){
     const n = c.rng.int(2,3);
-    const stepW = blocks(2);
-    const lead = blocks(2);
+    const stepW = sb(2,c.spd);
+    const lead = sb(1,c.spd);
     ground(o,x,lead);
     let cx = x+lead, hB = 0;
     for (let i=0;i<n;i++){
-      hB = Math.min(hB+1, 2);                 // one block per step, capped under the apex
+      hB = 1;                                 // one block: a single jump clears it                 // one block per step, capped under the apex
       ground(o,cx,stepW,GY-blocks(hB));
       if (i===n-1 && c.rng.chance(0.5)) coinAt(o,cx+stepW/2, GY-blocks(hB+1), c.rng);
       cx += stepW;
     }
-    const pit = blocks(3);
-    if (c.hard) spike(o,cx+blocks(1),GY,2);
-    ground(o,cx,pit+blocks(3));
-    return (cx+pit+blocks(3))-x;
+    const pit = blocks(4);
+    if (c.hard) spike(o,cx+blocks(4),GY,2);
+    ground(o,cx,pit+blocks(2));
+    return (cx+pit+blocks(2))-x;
   },
 
-  /* GD-style floating staircase with a spike bed underneath */
-  stairSpikes(o,x,c){
-    const lead = blocks(3);
-    const stepW = blocks(2);
-    const n = 3;
-    const tail = blocks(4);
-    ground(o,x,lead+stepW*n+tail);
-    let cx = x+lead, hB = 2;
-    for (let i=0;i<n;i++){
-      block(o,cx,GY-blocks(hB),stepW,B/2);
-      cx += stepW; hB = Math.min(hB+1, c.noDouble?3:4);
-    }
-    spike(o, x+lead, GY, n*2);              // the bed under the staircase
-    if (c.rng.chance(0.5)) coinAt(o,cx-stepW/2, GY-blocks(hB+1), c.rng);
-    return (cx+tail)-x;
-  },
 
   /* overhead block — must crouch */
   ceiling(o,x,c){
-    const lead = blocks(3);
+    const lead = sb(2,c.spd);
     const cw   = blocks(c.rng.int(2,4));
-    const tail = blocks(3);
+    const tail = sb(2,c.spd);
     ground(o,x,lead+cw+tail);
     // hangs 3 blocks up, bottom edge 46px over the floor: too low to stand, fine to crouch
     block(o,x+lead,GY-blocks(3),cw,blocks(3)-46,'ceil');
     if (c.rng.chance(0.3)) coinAt(o,x+lead+cw/2, GY-22, c.rng);
-    if (c.hard && c.rng.chance(0.4)) spike(o,x+lead-blocks(1)-10,GY,1);
+    // no spike in front: jumping it would launch you straight into the ceiling
     return lead+cw+tail;
   },
 
   /* square that slides up and down */
   movers(o,x,c){
-    const n = c.hard ? c.rng.int(1,2) : 1;
-    const spacing = blocks(4);
-    const lead = blocks(3), tail = blocks(3);
+    const n = 1;
+    const spacing = clearBy(c.spd,1);
+    const lead = sb(2,c.spd), tail = blocks(2);
     ground(o,x,lead+spacing*n+tail);
     for (let i=0;i<n;i++){
       o.hazards.push({type:'mover',x:x+lead+i*spacing,y:GY-blocks(2),w:B,h:B,
-        amp:blocks(c.rng.range(1,1.5)), cycle:blocks(8), phase:c.rng.range(0,1), base:GY-blocks(2)});
+        amp:blocks(c.rng.range(1,1.4)), cycle:blocks(13), phase:c.rng.range(0,1), base:GY-blocks(2)});
     }
     if (c.rng.chance(0.35)) coinAt(o,x+lead+spacing*n*0.5, GY-blocks(1), c.rng);
     return lead+spacing*n+tail;
   },
 
-  /* raised platform with a spike on each shoulder */
-  spikeBridge(o,x,c){
-    const lead = blocks(3);
-    const pw = blocks(c.rng.int(4,5));
-    const ph = blocks(2);
+
+  /* a launch orb strung over a gap that a plain jump can't clear */
+  orbHop(o,x,c){
+    const lead = sb(3,c.spd);
+    const gw   = blocks(c.rng.int(3,4));
+    const tail = landingRun(c.spd, 2);
     ground(o,x,lead);
-    ground(o,x+lead,pw,GY-ph);
-    spike(o,x+lead,GY-ph,1);
-    spike(o,x+lead+pw-SPIKE_W,GY-ph,1);
-    if (c.rng.chance(0.4)) coinAt(o,x+lead+pw/2, GY-ph-blocks(1), c.rng);
-    const tail = blocks(4);
-    ground(o,x+lead+pw,tail);
-    return lead+pw+tail;
+    ground(o,x+lead+gw,tail);
+    orb(o, x+lead+gw*0.30, GY-blocks(1.1));
+    if (c.rng.chance(0.6)) coinAt(o,x+lead+gw*0.72, GY-blocks(4), c.rng, true);
+    return lead+gw+tail;
+  },
+
+  /* orb over a spike field: bounce instead of threading it */
+  orbSpikes(o,x,c){
+    const lead = sb(4,c.spd);
+    const n = c.rng.int(1,2);
+    const tail = landingRun(c.spd, n);
+    ground(o,x,lead+blocks(n)+tail);
+    spike(o,x+lead,GY,n);
+    // the row is jumpable on its own; the orb sits ahead of it as the easy line
+    orb(o, x+lead-blocks(1.2), GY-blocks(1.2));
+    if (c.rng.chance(0.5)) coinAt(o,x+lead+blocks(n*0.8), GY-blocks(4.2), c.rng, true);
+    return lead+blocks(n)+tail;
+  },
+
+  /* high ledge you can only reach off an orb */
+  orbTower(o,x,c){
+    const lead = sb(2,c.spd);
+    const pw = sb(c.rng.int(3,5),c.spd);
+    const tail = sb(3,c.spd);
+    ground(o,x,lead+blocks(2)+pw+tail);
+    orb(o, x+lead+blocks(1), GY-blocks(1.6));
+    block(o,x+lead+blocks(2),GY-blocks(4),pw,B/2);
+    coinAt(o,x+lead+blocks(2)+pw/2, GY-blocks(5), c.rng, true);
+    return lead+blocks(2)+pw+tail;
   },
 
   /* sticky gum on the floor (Chewing-gum world) */
+  /* ---------- new common obstacles ---------- */
+
+  /* 1. saw blade sunk into the floor, spinning */
+  saw(o,x,c){
+    const lead = sb(2,c.spd), n=c.hard?c.rng.int(1,2):1, step=landingRun(c.spd,2), tail=sb(2,c.spd);
+    ground(o,x,lead+step*n+tail);
+    for(let i=0;i<n;i++) o.hazards.push({type:'saw',x:x+lead+i*step,y:GY-blocks(0.8),w:blocks(1.6),h:blocks(1.6),t:0});
+    return lead+step*n+tail;
+  },
+  /* 2. spike hanging from the ceiling — duck or die */
+  stalactite(o,x,c){
+    const lead = sb(2,c.spd), n=c.rng.int(2,3), step=blocks(3), tail=blocks(2);
+    ground(o,x,lead+step*n+tail);
+    for(let i=0;i<n;i++) o.hazards.push({type:'drop',x:x+lead+i*step,y:GY-blocks(3),w:B,h:B,t:0});
+    return lead+step*n+tail;
+  },
+  /* 3. crumbling tiles: stand on them and they fall away */
+  crumble(o,x,c){
+    const lead = sb(3,c.spd), n=3, tail=landingRun(c.spd, 2);
+    ground(o,x,lead);
+    for(let i=0;i<n;i++) o.solids.push({kind:'block',x:x+lead+i*sb(2,c.spd),y:GY-blocks(1.2),w:sb(2,c.spd),h:B/2,crumble:0.7});
+    ground(o,x+lead+sb(2,c.spd)*n,tail);
+    if(c.rng.chance(0.5)) coinAt(o,x+lead+sb(2,c.spd)*n*0.5,GY-blocks(2.6),c.rng);
+    return lead+sb(2,c.spd)*n+tail;
+  },
+  /* 4. a spike that pops out of the floor on a cycle */
+  piston(o,x,c){
+    const lead = sb(2,c.spd), n=c.hard?3:2, step=landingRun(c.spd,1), tail=sb(2,c.spd);
+    ground(o,x,lead+step*n+tail);
+    for(let i=0;i<n;i++) o.hazards.push({type:'piston',x:x+lead+i*step,y:GY-B,w:B,h:B,
+      cycle:blocks(11), phase:c.rng.range(0,1)});
+    return lead+step*n+tail;
+  },
+  /* 5. narrow pillars you hop across, gaps underneath */
+  pillars(o,x,c){
+    const lead = sb(2,c.spd), n=c.rng.int(3,4), tail=blocks(2);
+    ground(o,x,lead);
+    const st=stride(c.spd);
+    for(let i=0;i<n;i++) ground(o,x+lead+i*st,blocks(2),GY-blocks(1));
+    ground(o,x+lead+st*n,tail);
+    if(c.rng.chance(0.55)) coinAt(o,x+lead+st*n*0.5,GY-blocks(3),c.rng);
+    return lead+st*n+tail;
+  },
+  /* 6. a tunnel: ceiling above, spikes below, thread the middle */
+  /* crouch, stand, crouch — a saw on the floor inside a crouch section is
+     unclearable, since you cannot jump while ducked under a ceiling */
+  tunnel(o,x,c){
+    const lead = sb(2,c.spd), a=blocks(c.rng.int(2,3)), mid=blocks(2), b2=blocks(c.rng.int(2,3)), tail=blocks(2);
+    ground(o,x,lead+a+mid+b2+tail);
+    block(o,x+lead,GY-blocks(3),a,blocks(3)-46,'ceil');
+    block(o,x+lead+a+mid,GY-blocks(3),b2,blocks(3)-46,'ceil');
+    if (c.rng.chance(0.5)) coinAt(o,x+lead+a+mid*0.5,GY-blocks(1),c.rng);
+    return lead+a+mid+b2+tail;
+  },
+  /* 7. a floating slab that swings up and down as you cross it */
+  lift(o,x,c){
+    const lead = sb(2,c.spd), gw=blocks(c.rng.int(4,6)), tail=blocks(2);
+    ground(o,x,lead); ground(o,x+lead+gw,tail);
+    o.solids.push({kind:'block',x:x+lead+gw*0.34,y:GY-blocks(2),w:blocks(2.5),h:B/2,
+      x0:x+lead+gw*0.34,my:blocks(1.1),mp:c.rng.range(0,1)});
+    if(c.rng.chance(0.5)) coinAt(o,x+lead+gw*0.5,GY-blocks(3.4),c.rng);
+    return lead+gw+tail;
+  },
+  /* 8. spike wall you must orb over */
+  spikeWall(o,x,c){
+    const lead = sb(4,c.spd), tail=blocks(3);
+    ground(o,x,lead+blocks(3)+tail);
+    block(o,x+lead+blocks(1),GY-blocks(2.5),blocks(1),blocks(2.5));
+    spike(o,x+lead+blocks(2),GY,1);
+    orb(o,x+lead-blocks(0.5),GY-blocks(1.2));
+    return lead+blocks(3)+tail;
+  },
+  /* 9. zig-zag of alternating high and low ledges */
+  zigzag(o,x,c){
+    const lead = sb(2,c.spd), n=c.rng.int(3,4), tail=blocks(2);
+    ground(o,x,lead+stride(c.spd)*n+tail);
+    const zs=stride(c.spd);
+    for(let i=0;i<n;i++)
+      block(o,x+lead+i*zs,GY-blocks(i%2?2.6:1.4),blocks(2),B/2);
+    if(c.rng.chance(0.5)) coinAt(o,x+lead+zs*n*0.5,GY-blocks(3.6),c.rng);
+    return lead+zs*n+tail;
+  },
+  /* 10. a wide pit with one orb in the middle — commit or fall */
+  chasm(o,x,c){
+    const lead = sb(2,c.spd), gw=blocks(c.rng.int(4,5)), tail=sb(3,c.spd);
+    ground(o,x,lead); ground(o,x+lead+gw,tail);
+    orb(o,x+lead+gw*0.38,GY-blocks(1.2));
+    orb(o,x+lead+gw*0.70,GY-blocks(2.0));
+    coinAt(o,x+lead+gw*0.57,GY-blocks(3.6),c.rng,true);
+    return lead+gw+tail;
+  },
+
   gumField(o,x,c){
-    const lead = blocks(3);
+    const lead = sb(2,c.spd);
     const n = c.rng.int(1,3);
-    const step = blocks(4);
-    const tail = blocks(3);
+    const step = sb(3,c.spd);
+    const tail = sb(2,c.spd);
     ground(o,x,lead+step*n+tail);
     for(let i=0;i<n;i++){
       o.hazards.push({type:'gum',x:x+lead+i*step,y:GY-18,w:B,h:18,t:c.rng.range(0,6)});
@@ -1242,21 +1644,61 @@ const PATTERNS = {
 };
 
 /* which patterns are legal, and how likely, at a given speed */
+/* roughly how taxing each pattern is, 0..1 — drives the intensity curve */
+const COST = { saw:.5, stalactite:.45, crumble:.6, piston:.55, pillars:.6, tunnel:.6,
+  lift:.5, spikeWall:.5, zigzag:.55, chasm:.7,
+  flat:0, spikes:.45, gap:.4, airPlat:.5, steps:.45, ceiling:.4,
+  spikeBridge:.6, movers:.55, doubleGap:.75, stairSpikes:.8, gumField:.45,
+  orbHop:.5, orbSpikes:.55, orbTower:.45 };
+
 function patternWeights(c){
-  const w = { flat:1.2, spikes:5, gap:4, airPlat:3, steps:2.6, ceiling:2.4, spikeBridge:2.4 };
-  if (c.spd >= 1.10) { w.movers = 2.2; }
-  if (c.spd >= 1.20) { w.doubleGap = 2.2; w.stairSpikes = 2.4; }
-  if (c.spd >= 1.45) { w.flat = .5; w.spikes = 6; w.stairSpikes = 3.2; w.doubleGap = 3; }
+  /* Everything is in the mix from 1.00x. The old speed gates meant the opening
+     minute only ever drew from six patterns, which is what made it feel bland. */
+  const w = { flat:0.7, spikes:5, gap:3.4, airPlat:3.2, steps:2.6, ceiling:2.4,
+              movers:2.2, orbHop:2.8, orbSpikes:2.3, orbTower:2.3,
+              doubleGap:1.4,
+              saw:3, stalactite:2.6, crumble:2.4, piston:2.6, pillars:2.4,
+              tunnel:2.2, lift:2.4, spikeWall:2.4, zigzag:2.4, chasm:1.8 };
+  if (c.spd >= 1.20) { w.doubleGap = 2.2; w.flat = 0.45; }
+  if (c.spd >= 1.45) { w.flat = 0.25; w.spikes = 7; w.doubleGap = 2.6; w.movers = 3; }
   if (c.world === 'gum') { w.gumField = 5; w.movers = 0; }
   if (c.rules.ceilings) w.ceiling += 5;
   if (c.rules.gaps) { w.gap += 4; w.doubleGap = (w.doubleGap||0)+3; }
-  if (c.noDouble) { w.doubleGap = 0; }
+  /* One jump for everyone now. Orbs carry the vertical game, and the
+     precision-landing patterns get rarer rather than banned outright. */
+  w.orbHop *= 1.5; w.orbSpikes *= 1.35; w.orbTower *= 1.3; w.chasm *= 1.2;
+  w.doubleGap *= 0.45; w.pillars *= 0.6; w.zigzag *= 0.65; w.crumble *= 0.7;
+  if (c.rules.noOrbs) { w.orbHop = 0; w.orbSpikes = 0; w.orbTower = 0; }
+
+  /* --- intensity curve ---
+     `heat` climbs as hard patterns land and decays over easy ones. Hot means
+     back off; cold means push. Stops the generator from dumping four brutal
+     patterns in a row or coasting on flat ground for ten seconds. */
+  // phase bias: bursts favour cheap quick obstacles, set pieces the heavy ones
+  const ph = c.phase || 'burst';
+  for (const k in w){
+    const cost = COST[k] ?? .4;
+    if (ph==='burst')    w[k] *= cost < .45 ? 1.9 : 0.45;
+    if (ph==='setpiece') w[k] *= cost > .5  ? 2.2 : 0.5;
+    if (ph==='breather') w[k] *= cost < .3  ? 1.6 : 0.55;
+  }
+  const heat = c.heat || 0;
+  for (const k in w){
+    const cost = COST[k] ?? .4;
+    // a hot streak eases off to a mid-weight pattern rather than to empty floor
+    if (heat > .68) w[k] *= cost > .6 ? 0.25 : (cost < .25 ? 1.5 : 1.6);
+    else if (heat < .25) w[k] *= cost < .25 ? 0.15 : 1.7;
+  }
+  /* variety: anything seen in the last three beats gets damped */
+  (c.recent||[]).forEach((k,i)=>{ if (w[k]) w[k] *= [0.12,0.35,0.6][i] ?? 1; });
   return w;
 }
 
 /* pairs that read as unfair back-to-back */
 const BAD_PAIRS = {
-  gap:['ceiling','stairSpikes'],
+  gap:['ceiling','stairSpikes','spikeBridge'],
+  orbHop:['spikeBridge','spikes'],
+  orbTower:['spikeBridge','orbTower'],
   doubleGap:['ceiling','stairSpikes','gap'],
   airPlat:['ceiling'],
   stairSpikes:['ceiling','gap','doubleGap'],
@@ -1266,12 +1708,15 @@ const BAD_PAIRS = {
 };
 
 const Gen = {
-  rng:null, cursor:0, last:'flat', out:null,
+  rng:null, cursor:0, last:'flat', out:null, heat:0, recent:[],
 
   reset(seed, startX){
     this.rng = makeRNG(seed>>>0);
     this.cursor = startX;
     this.last = 'flat';
+    this.heat = 0;
+    this.phase = 'burst'; this.beat = 0; this.phaseLen = 3;
+    this.recent = [];
   },
 
   /* run flat ground up to x (used for world-switch breathers) */
@@ -1290,22 +1735,43 @@ const Gen = {
   fill(out, toX, c){
     let guard = 0;
     while (this.cursor < toX && guard++ < 60){
-      const jd = jumpDist(c.spd);
-      const weights = patternWeights(c);
+      const weights = patternWeights(Object.assign({}, c, { heat:this.heat, recent:this.recent }));
       const banned = BAD_PAIRS[this.last] || [];
       banned.forEach(b => { if (weights[b] !== undefined) weights[b] = 0; });
       let key = this.rng.weighted(weights);
       if (!PATTERNS[key]) key = 'flat';
 
-      const ctx = Object.assign({}, c, { rng:this.rng, hard:c.spd>=1.35 });
+      /* Runs now move through phases instead of one flat cadence: a burst packs
+         cheap obstacles close together, a set piece drops one heavy pattern with
+         room to read it, and a breather opens up before the next burst. */
+      this.beat = (this.beat||0) + 1;
+      if (this.beat > (this.phaseLen||0)){
+        this.beat = 0;
+        const roll = this.rng.next();
+        this.phase = roll < 0.46 ? 'burst' : roll < 0.80 ? 'setpiece' : 'breather';
+        this.phaseLen = this.phase==='burst' ? this.rng.int(3,5)
+                      : this.phase==='setpiece' ? this.rng.int(1,2)
+                      : this.rng.int(1,2);
+      }
+      COIN_MULT = c.coinBoost || 1;
+      SPACE_MULT = 2.0;      // one jump means no mid-air correction; everything needs room
+      const ctx = Object.assign({}, c, { rng:this.rng, hard:c.spd>=1.35, phase:this.phase });
       const w = PATTERNS[key](out, this.cursor, ctx);
       this.cursor += w;
 
-      // recovery run, longer after the punishing stuff
-      const heavy = ['stairSpikes','doubleGap','movers','steps'].includes(key);
-      const rec = blocks(heavy?3:2);
+      // every pattern is followed by enough ground to land, reset and read the
+      // next one. Scales with the arc, so it holds at every speed.
+      const cost = COST[key] ?? .4;
+      /* Low speed is packed; high speed spreads out because everything arrives
+         twice as fast anyway. Without this, 2.00x is unreadable rather than hard. */
+      const airy = 1 + (c.spd-1)*0.30;
+      const phaseGap = this.phase==='burst' ? 0.42 : this.phase==='setpiece' ? 0.85 : 1.15;
+      const rec = Math.max(blocks(1), Math.ceil(CFG.PX*c.spd*(0.13+cost*0.15)*airy*phaseGap/B)*B);
       ground(out, this.cursor, rec);
       this.cursor += rec;
+
+      this.heat = clamp(this.heat*0.72 + cost*0.62, 0, 1);
+      this.recent.unshift(key); if (this.recent.length>3) this.recent.pop();
       this.last = key;
     }
   },
@@ -1331,6 +1797,7 @@ const Game = {
   trans:null, breakUntilX:0, nameT:0,
   runCoins:0, runShards:0, attempts:1,
   solids:[], hazards:[], picks:[], fx:[], bgParts:[], sand:[], sandClouds:[], sandK:0, gustT:0,
+  ash:[], ashK:0, stutFreeze:0, stutT:0, mirrored:false, gravMul:1, vineT:0, skinId:null,
   colTimer:0, colEvents:[],
   bgT:0, shake:0, shakeMag:0,
   barrierX:-260, fill:0, overShown:false, result:null,
@@ -1361,7 +1828,9 @@ const Game = {
     document.getElementById('rotate').classList.toggle('hide', !(portrait && coarse));
 
     this.H = CFG.H;
-    this.W = Math.round(clamp(CFG.H * (vw/vh), 640, 1600));
+    // GD shows ~19-20 blocks across. Letting a wide phone stretch to 22+ made
+    // everything read smaller than it should, so the view is capped instead.
+    this.W = Math.round(clamp(CFG.H * (vw/vh), CFG.GRID*13, CFG.GRID*20));
 
     // fit that logical box inside the window, then size the frame to it exactly
     const scale = Math.min(vw/this.W, vh/this.H);
@@ -1386,6 +1855,7 @@ const Game = {
       if (code===K.jump   || code===K.jumpAlt)   return 'jump';
       if (code===K.crouch || code===K.crouchAlt) return 'crouch';
       if (code===K.skill)     return 'skill';
+      if (code===K.skillAlt)  return 'skillAlt';
       if (code===K.laneLeft)  return 'left';
       if (code===K.laneRight) return 'right';
       if (code===K.pause)     return 'pause';
@@ -1400,6 +1870,13 @@ const Game = {
         case 'left':   this.lane(-1); break;
         case 'right':  this.lane(1); break;
         case 'skill':  this.useSkill(); break;
+        case 'skillAlt': {
+          // fires on a quick double-press so a single tap stays harmless
+          const now = performance.now();
+          if (now - (this._altTap||0) < 320){ this._altTap = 0; this.useSkill(); }
+          else this._altTap = now;
+          break;
+        }
         case 'pause':  UI.togglePause(); break;
       }
     });
@@ -1463,15 +1940,20 @@ const Game = {
     this.reset(lv.world, lv.spd, lv.seed);
     this.begin();
   },
-  _randomWorld(prev, noColumns){
-    const pool = WORLDS.filter(w=>w.id!==prev && !(noColumns && w.mech==='columns'));
+  _randomWorld(prev, opening){
+    // the first world of a run should read as normal: no upside-down, no lanes
+    const pool = WORLDS.filter(w=>w.id!==prev &&
+      !(opening && (w.mech==='columns' || w.mech==='flip')));
     return pool[Math.floor(Math.random()*pool.length)].id;
   },
 
   reset(worldId, spd, seed){
     this.t=0; this.score=0; this.worldX=0; this.spd=spd;
     this.solids=[]; this.hazards=[]; this.picks=[]; this.fx=[]; this.sand=[]; this.sandClouds=[];
+    this.ash=[]; this.ashK=0; this.stutFreeze=0; this.stutT=0; this.mirrored=false;
+    this.gravMul=1; this.vineT=0;
     this.runCoins=0; this.runShards=0; this.skillUses=0; this.cd=0; this.skillT=0;
+    this.picksMissed=0;
     this.maxT=0;
     this.barrierX=-320; this.fill=0; this.overShown=false; this.result=null;
     this.shake=0; this.bgT=0; this.colTimer=0.9;
@@ -1482,9 +1964,13 @@ const Game = {
     Gen.reset(seed, 0);
     this.breakUntilX = CFG.PX*spd*1.9 + 260;   // free run-up at the start of every attempt
     this.stats = { jumps:0, djumps:0, slows:0, crouches:0, skills:0, att:this.attempts };
+    if (Save.d.randomDesign){
+      const owned = Save.d.designs.filter(id=>DESIGNS.some(d=>d.id===id));
+      if (owned.length) this.skinId = owned[Math.floor(Math.random()*owned.length)];
+    } else this.skinId = null;
     this.p = {
-      by: GY, vy:0, h:CFG.R*2, targetH:CFG.R*2, grounded:true, jumps:0, maxJumps:2,
-      rot:0, screenX:CFG.PLAYER_X, sqX:1, sqY:1, gliding:false, glideT:0,
+      by: GY, vy:0, h:CFG.R*2, targetH:CFG.R*2, grounded:true, jumps:0, maxJumps:1,
+      rot:0, screenX:CFG.PLAYER_X, sqX:1, sqY:1, gliding:false, glideT:0, slowHold:0,
       crouch:false, alive:true, invuln:0, fadeT:0, tripleT:0, dashT:0, cleanseT:0,
       gumT:0, gumCd:0, coyote:0, jumpLock:0, jumpBuf:0, lane:1, laneX:CFG.PLAYER_X, dead:false, trail:[]
     };
@@ -1522,41 +2008,38 @@ const Game = {
     if (to.mech==='columns') kind='build';
     else if (from.mech==='columns') kind='unbuild';
     else if (to.mech==='flip' || from.mech==='flip') kind='flip';
-    this.trans = { k:kind, t:0, dur: kind==='wipe'?1.25:1.15, from:this.worldId, to:id, swapped:false };
+    // a biome bleeds in over several seconds rather than snapping
+    this.trans = { k:kind, t:0, dur: kind==='wipe'?3.4:1.6, from:this.worldId, to:id, swapped:false };
     this.palFrom = Object.assign({}, from.pal); this.palTo = Object.assign({}, to.pal); this.palK = 0;
     Audio2.playWorld(id, false);
     Audio2.sfx('world');
 
-    /* ---- carve a genuinely empty runway ----
-       Terrain the player has already committed to stays put. Everything past
-       that dissolves on screen, and the floor runs flat until breakUntilX.
-       Without this the generator was already miles ahead and the breather
-       never actually happened. */
+    /* ---- biome bleed ---- */
     const px  = CFG.PX*this.spd;
     const cut = this.worldX + this.p.screenX + px*COMMIT_TIME;
 
-    for (const h of this.hazards){
-      if (h.type==='fall' || h.type==='bar'){ h.vanishT = 0.22; continue; }
-      if ((h.x===undefined ? 1e9 : h.x) > cut) h.vanishT = 0.26 + Math.random()*0.22;
-    }
-    this.picks = this.picks.filter(c => c.x < cut);
-
-    const kept = [];
-    for (const sd of this.solids){
-      if (sd.x >= cut){
-        if (sd.kind !== 'ground'){ sd.vanishT = 0.3 + Math.random()*0.2; kept.push(sd); }
-        continue;                                   // stale floor is rebuilt flat below
+    /* Worlds bleed into each other like biomes now: terrain keeps flowing and
+       only the look changes, so there is no cleared runway. Column worlds are
+       structurally different, so those alone still get a rebuild. */
+    if (worldById(id).mech==='columns' || from.mech==='columns'){
+      for (const h of this.hazards) h.vanishT = 0.24 + Math.random()*0.2;
+      this.picks = this.picks.filter(c => c.x < cut);
+      const kept = [];
+      for (const sd of this.solids){
+        if (sd.x >= cut){ if (sd.kind!=='ground'){ sd.vanishT = 0.3; kept.push(sd); } continue; }
+        if (sd.kind === 'ground' && sd.x + sd.w > cut) sd.w = cut - sd.x;
+        kept.push(sd);
       }
-      if (sd.kind === 'ground' && sd.x + sd.w > cut) sd.w = cut - sd.x;
-      kept.push(sd);
+      this.solids = kept;
+      Gen.reset(Math.floor(Math.random()*1e9), cut);
+      this.breakUntilX = cut + px*1.1;
+    } else {
+      // hazards that only exist in the world we are leaving still clear out
+      const leaving = ['gum','fall','bar'];
+      for (const h of this.hazards)
+        if (leaving.includes(h.type) && (h.x===undefined?1e9:h.x) > cut) h.vanishT = 0.3;
+      this.breakUntilX = -1e9;                     // terrain never stops
     }
-    this.solids = kept;
-
-    Gen.reset(Math.floor(Math.random()*1e9), cut);
-    // include the transition itself, so the clear stretch AFTER the new world
-    // appears is exactly breakTime — short when slow, long when fast
-    const stageDur = (SPEED_STEPS[this.stepIdx]||{dur:60}).dur;
-    this.breakUntilX = this.worldX + this.p.screenX + px*(this.trans.dur + cappedBreak(this.spd, stageDur));
   },
   finishSwitch(){
     const id = this.trans.to, p = this.p;
@@ -1603,14 +2086,28 @@ const Game = {
     } else {
       if (Gen.cursor < this.breakUntilX) Gen.runFlat(out, Math.min(ahead, this.breakUntilX));
       if (Gen.cursor < ahead){
+        /* During a transition this.worldId is still the OLD world until the
+           halfway point, so generating from it dropped gum blobs and other
+           world-only obstacles into the world you were moving into. */
+        const genWorld = this.trans ? this.trans.to : this.worldId;
         Gen.fill(out, ahead, {
-          spd:this.spd, world:this.worldId, rules:this.rules,
-          noDouble: this.rules.noDouble || this.worldId==='malik'
+          spd:this.spd, world:genWorld, rules:this.rules, coinBoost:this.mode==='adv'?7:1,
+          noDouble: true                 // there is no double jump any more
         });
       }
     }
+    // an adventure coin taken on a previous attempt is gone for good
+    if (this.mode==='adv' && this.level){
+      const taken = Save.d.adventure.taken?.[this.level.key];
+      if (taken && taken.length){
+        for (let i=this.picks.length-1;i>=0;i--){
+          const k = Math.round(this.picks[i].x);
+          if (taken.includes(k)) this.picks.splice(i,1);
+        }
+      }
+    }
     // Me ni mienai: tag some new obstacles with their own flicker rhythm
-    const flick = worldById(this.worldId).mech==='flicker' || this.rules.flicker;
+    const flick = worldById(this.trans?this.trans.to:this.worldId).mech==='flicker' || this.rules.flicker;
     if (flick) for (let i=before;i<this.hazards.length;i++){
       const h=this.hazards[i];
       if (Math.random()<0.62) h.flick = { sp:rand(1.6,5.2), ph:rand(0,6.3), duty:rand(0.32,0.62) };
@@ -1623,13 +2120,13 @@ const Game = {
     const p=this.p;
     if (p.gumT>0) { Audio2.sfx('deny'); return; }
     if (p.crouch) this.setCrouch(false);
-    let maxJ = p.tripleT>0 ? 3 : (this.rules.noDouble || this.worldId==='malik' ? 1 : 2);
+    let maxJ = 1;                       // one jump, always. GD rules.
     // out of jumps with Triple Jump equipped and ready? the jump control arms it.
-    if (p.jumps >= maxJ && Save.d.equipSkill==='triple' && Save.ownsSkill('triple')
-        && !this.rules.noSkill && this.cd<=0 && this.skillT<=0 && p.tripleT<=0
-        && !this.rules.noDouble && this.worldId!=='malik'){
-      this.useSkill();
-      maxJ = 3;
+    if (p.jumps >= maxJ && Save.d.equipSkill==='double' && Save.ownsSkill('double')
+        && !this.rules.noSkill && this.cd<=0 && this.skillT<=0
+        && this.worldId!=='malik'){
+      this.useSkill();               // spends the charge and starts the cooldown
+      maxJ = p.jumps + 1;            // exactly one extra jump
     }
     if (p.jumps >= maxJ) return;
     // a mashed second tap used to overwrite the first jump's velocity and leave
@@ -1638,7 +2135,7 @@ const Game = {
     const first = p.jumps===0 && (p.grounded || p.coyote>0);
     p.vy = Math.min(p.vy, -(first ? CFG.JUMP : CFG.DJUMP));   // always a boost, never a brake
     p.jumpLock = 0.08;
-    p.jumps++; p.grounded=false; p.gliding=false; p.coyote=0;
+    p.jumps++; p.grounded=false; p.gliding=false; p.coyote=0; p.slowHold=0;
     p.sqX = 0.82; p.sqY = 1.2;
     if (first){ this.stats.jumps++; Audio2.sfx('jump'); this.puff(6,'#000'); }
     else { this.stats.djumps++; Audio2.sfx('djump'); this.ring(p.screenX,p.by-p.h/2,10,52,'#ffffff',0.35); }
@@ -1653,6 +2150,7 @@ const Game = {
     else { Audio2.sfx('uncrouch'); p.sqX=0.88; p.sqY=1.12; }
   },
   lane(dir){
+    if (this.mirrored) dir = -dir;
     if (this.state!=='run' || !this.inColumns) return;
     const p=this.p;
     if (p.gumT>0) return;
@@ -1686,8 +2184,8 @@ const Game = {
       for(let i=0;i<14;i++) this.fx.push({k:'ghost',x:p.screenX,y:p.by-p.h/2,r:CFG.R,a:0.5,life:0.7,t:0,vx:rand(-40,-160),vy:rand(-40,40),c:'#b47bff'});
       this.ring(p.screenX,p.by-p.h/2,14,120,'#b47bff',0.55);
     }
-    if (id==='triple'){
-      p.tripleT=skillById('triple').dur; Audio2.sfx('sk_triple');
+    if (id==='double'){
+      p.tripleT=0; Audio2.sfx('sk_triple');
       for(let i=0;i<3;i++) this.ring(p.screenX,p.by-p.h/2,8+i*10,60+i*18,'#7bff9e',0.4);
     }
     if (id==='dash'){
@@ -1760,7 +2258,7 @@ const Game = {
         this.stepT = SPEED_STEPS[this.stepIdx].dur;
         Audio2.setRate(this.spd);
         if (this.stepIdx < SPEED_STEPS.length-1) this.switchWorld(this._randomWorld(this.worldId));
-        else { this.nameT=2.0; this.breakUntilX=this.worldX+CFG.PX*this.spd*1.4; }
+        else this.nameT=2.0;
       }
       if (this.spd>=2){
         this.maxT += dt;
@@ -1780,7 +2278,7 @@ const Game = {
 
     /* ---- scroll ---- */
     const dashBoost = p.dashT>0 ? 2.3 : 0;
-    const px = CFG.PX*this.spd*(1+dashBoost);
+    const px = CFG.PX*this.spd*(1+dashBoost)*(this.stutFreeze>0?0.12:1);
     this.worldX += px*dt;
     this.score += dt*this.spd*115 * (this.mode==='chal'?1:0.6);
 
@@ -1822,17 +2320,22 @@ const Game = {
 
     /* ---- gravity / glide ---- */
     const canGlide = !this.rules.noSlow && this.worldId!=='malik';
-    const wantGlide = canGlide && this.jumpHeld && !p.grounded && p.vy>0;
+    /* Slow fall used to engage the instant you were falling with jump held, so
+       holding the pad a beat too long silently rewrote your arc. It now needs a
+       deliberate hold once you are actually descending. */
+    const holding = canGlide && this.jumpHeld && !p.grounded && p.vy>0;
+    p.slowHold = holding ? p.slowHold + dt : 0;
+    const wantGlide = holding && p.slowHold >= CFG.SLOW_DELAY;
     if (wantGlide && !p.gliding){ p.gliding=true; this.stats.slows++; Audio2.sfx('slow'); p.glideT=0;
       this.ring(p.screenX,p.by-p.h/2,10,44,'#ffffff',0.32); }
     if (!wantGlide) p.gliding=false;
     if (p.gliding){
       p.glideT+=dt;
-      p.vy += CFG.G*CFG.SLOW_G*dt;
+      p.vy += CFG.G*CFG.SLOW_G*(this.gravMul||1)*dt;
       p.vy = Math.min(p.vy, CFG.SLOW_MAX);
       if (Math.random()<0.5) this.fx.push({k:'spark',x:p.screenX+rand(-14,14),y:p.by-p.h/2+rand(-10,10),vx:rand(-60,-20),vy:rand(-10,40),life:0.4,t:0,c:'#ffffff'});
     } else {
-      p.vy += CFG.G*dt;
+      p.vy += CFG.G*(this.gravMul||1)*dt;
     }
     if (p.dashT>0) p.vy=Math.min(p.vy, 120);
 
@@ -1844,6 +2347,12 @@ const Game = {
 
     /* ---- rotation follows speed ---- */
     p.rot += (px*dt)/CFG.R * (this.flipped?-1:1);
+
+    /* ---- sliding ledges (deterministic on distance, not wall time) ---- */
+    for (const s of this.solids){
+      if (s.mx===undefined) continue;
+      s.x = s.x0 + Math.sin((this.worldX/460 + s.mp)*Math.PI*2)*s.mx;
+    }
 
     /* ---- collision ---- */
     this.collide(dt);
@@ -1863,12 +2372,18 @@ const Game = {
     for (let i=this.picks.length-1;i>=0;i--){
       const c=this.picks[i]; c.t+=dt;
       const sx=c.x-this.worldX;
-      if (sx < -60){ this.picks.splice(i,1); continue; }
+      if (sx < -60){ this.picksMissed++; this.picks.splice(i,1); continue; }
       if (Math.abs(sx-p.screenX)<CFG.R+c.r && Math.abs(c.y-(p.by-p.h/2))<CFG.R+c.r+6){
         if (c.type==='coin'){ this.runCoins++; Audio2.sfx('coin'); }
         else { this.runShards++; Audio2.sfx('shard'); this.shakeIt(0.16,4); }
         this.ring(sx,c.y,6,44,c.type==='coin'?'#ffc63d':'#7be3ff',0.7);
         for(let k=0;k<10;k++) this.fx.push({k:'spark',x:sx,y:c.y,vx:rand(-200,200),vy:rand(-220,60),life:0.55,t:0,c:c.type==='coin'?'#ffe08a':'#bff2ff'});
+        if (this.mode==='adv' && this.level){
+          const s=Save.d.adventure;
+          s.taken = s.taken || {};
+          (s.taken[this.level.key] = s.taken[this.level.key] || []).push(Math.round(c.x));
+          Save.save();
+        }
         this.picks.splice(i,1);
       }
     }
@@ -1941,6 +2456,22 @@ const Game = {
     /* hazards */
     if (p.invuln<=0){
       for (const h of this.hazards){
+        if (h.type==='orb'){
+          if (h.used) continue;
+          const b=this.hazBox(h);
+          if (box.x<b.x+b.w && box.x+box.w>b.x && box.y<b.y+b.h && box.y+box.h>b.y){
+            h.used=true; h.pop=0;
+            p.vy = -CFG.ORB_POWER;
+            p.jumps = 0;                       // a launch is not a jump
+            p.grounded=false; p.gliding=false; p.coyote=0; p.jumpLock=0;
+            p.sqX=0.78; p.sqY=1.28;
+            Audio2.sfx('orb');
+            this.ring(p.screenX,p.by-p.h/2,12,86,'#ffd84a',0.6);
+            for(let i=0;i<12;i++) this.fx.push({k:'spark',x:h.x-this.worldX+h.w/2,y:h.y+h.h/2,
+              vx:rand(-160,160),vy:rand(-260,-40),life:0.5,t:0,c:'#ffe98a'});
+          }
+          continue;
+        }
         if (h.type==='gum'){
           const sx=h.x-this.worldX;
           if (p.cleanseT>0) continue;
@@ -1950,7 +2481,7 @@ const Game = {
           }
           continue;
         }
-        if (ghost || h.vanishT!==undefined) continue;
+        if (ghost || h.vanishT!==undefined || h.type==='orb') continue;
         const b = this.hazBox(h);
         if (!b) continue;
         if (box.x < b.x+b.w && box.x+box.w > b.x && box.y < b.y+b.h && box.y+box.h > b.y){
@@ -1964,7 +2495,14 @@ const Game = {
   hazBox(h){
     const sx = (h.type==='fall'||h.type==='bar') ? h.sx : h.x-this.worldX;
     if (sx===undefined) return null;
-    if (h.type==='spike') return { x:sx+6, y:h.y+7, w:h.w-12, h:h.h-7 };
+    if (h.type==='orb')   return { x:sx+2, y:h.y+2, w:h.w-4, h:h.h-4 };
+    if (h.type==='vine')  return { x:sx+h.w*0.3, y:h.y, w:h.w*0.4, h:h.h };
+    if (h.type==='saw')   return { x:sx+h.w*0.16, y:h.y+h.h*0.16, w:h.w*0.68, h:h.h*0.68 };
+    if (h.type==='drop')  return { x:sx+h.w*0.24, y:h.y, w:h.w*0.52, h:h.h*0.9 };
+    if (h.type==='piston'){ const up=Math.sin((this.worldX/h.cycle+h.phase)*Math.PI*2)>0.15;
+      return up ? { x:sx+h.w*0.22, y:h.y, w:h.w*0.56, h:h.h } : null; }
+    if (h.type==='spike') return { x:sx+CFG.GRID*0.20, y:h.y+CFG.GRID*0.26,
+                                   w:h.w-CFG.GRID*0.40, h:h.h-CFG.GRID*0.26 };
     if (h.type==='mover') return { x:sx+3, y:h.cy-h.h/2+3, w:h.w-6, h:h.h-6 };
     if (h.type==='fall')  return { x:sx-h.w/2+4, y:h.y+4, w:h.w-8, h:h.h-8 };
     if (h.type==='bar')   return { x:h.bx, y:h.y, w:h.bw, h:h.h };
@@ -1984,6 +2522,44 @@ const Game = {
       if (h.type==='mover'){
         const ph = this.worldX/h.cycle + h.phase;
         h.cy = h.base - Math.sin(ph*Math.PI*2)*h.amp;
+      }
+    }
+
+    /* ---- new world mechanics ---- */
+    const mech = w.mech;
+
+    // KAVERN: low gravity — floatier arcs, longer hang time
+    this.gravMul = (mech==='lowgrav' || this.rules.lowgrav) ? 0.62 : 1;
+
+    // CINDER: embers drift down and dim the screen (cleansable)
+    if ((mech==='ash' || this.rules.ash) && p.cleanseT<=0){
+      this.ashK = Math.min(1, (this.ashK||0) + dt*0.7);
+      while (this.ash.length < (Save.d.set.particles?90:45))
+        this.ash.push({x:rand(0,this.W),y:rand(-40,this.H),v:rand(18,70),
+                       s:rand(1.6,4.4),d:rand(0,6.3)});
+      for (const a of this.ash){
+        a.y += a.v*dt; a.x -= px*dt*0.16 + Math.sin(this.bgT+a.d)*8*dt;
+        if (a.y>this.H+20){ a.y=-20; a.x=rand(0,this.W); }
+      }
+    } else { this.ashK = Math.max(0,(this.ashK||0)-dt*2.2); if(this.ashK<=0) this.ash.length=0; }
+
+    // NULLSTATE: time stutters — brief freezes you have to read through
+    if (mech==='stutter' || this.rules.stutter){
+      this.stutT = (this.stutT||0) - dt;
+      if (this.stutT<=0){ this.stutT = rand(1.6,3.4); this.stutFreeze = 0.12; }
+      if (this.stutFreeze>0) this.stutFreeze -= dt;
+    } else { this.stutFreeze = 0; }
+
+    // GLASSWING: the world reads mirrored, so left and right swap
+    this.mirrored = (mech==='mirror' || this.rules.mirror) && p.cleanseT<=0;
+
+    // VERDANCE: vines hang down and slow you if you brush them
+    if (mech==='vines' || this.rules.vines){
+      this.vineT = (this.vineT||0) - dt;
+      if (this.vineT<=0){
+        this.vineT = rand(0.9,1.8);
+        this.hazards.push({type:'vine',x:this.worldX+this.W+40,
+          y:0,w:CFG.GRID*0.7,h:CFG.GROUND_Y-CFG.GRID*2.4,t:0});
       }
     }
 
@@ -2066,6 +2642,15 @@ const Game = {
     if (this.tryRevive()) return;
     this.finish('over');
   },
+  pickKey(c){ return this.level ? this.level.key+':'+Math.round(c.x) : null; },
+  earnedStars(){
+    if (this.mode!=='adv') return 0;
+    let s = 1;                                    // reaching the end is the first star
+    if (this.skillUses===0) s++;                  // no skill used
+    const seen = this.picksMissed + this.runCoins + this.runShards;
+    if (seen>0 && this.picksMissed===0) s++;      // every coin on the route collected
+    return s;
+  },
   finish(kind){
     if (this.state!=='run') return;
     this.result = kind;
@@ -2100,6 +2685,8 @@ const Game = {
       if (kind==='clear'){
         if (!s.adventure.cleared.includes(key)) s.adventure.cleared.push(key);
         s.adventure.unlocked = Math.max(s.adventure.unlocked, Math.min(LEVELS.length, this.level.n+1));
+        this.runStars = this.earnedStars();
+        b.stars = Math.max(b.stars||0, this.runStars);   // best run keeps its stars
       }
     }
     Save.save();
@@ -2353,7 +2940,9 @@ const Game = {
         a = cyc>h.flick.duty ? 1 : clamp((cyc/h.flick.duty)*1.5-0.4,0,1);
       }
       x.globalAlpha=a;
+      if (h.type==='saw'||h.type==='drop'||h.type==='piston'||h.type==='vine'){ this.drawNew(h); continue; }
       if (h.type==='spike') this.drawSpike(h);
+      else if (h.type==='orb') this.drawOrb(h);
       else if (h.type==='mover') this.drawMover(h);
       else if (h.type==='gum') this.drawGum(h);
       else if (h.type==='fall') this.drawFall(h);
@@ -2376,6 +2965,66 @@ const Game = {
       } else { cur={x:s.x,y:s.y,w:s.w,h:s.h}; out.push(cur); }
     }
     return out;
+  },
+  drawOrb(h){
+    const x=this.x, sx=h.x-this.worldX+h.w/2, sy=h.y+h.h/2, R=h.w/2;
+    if (sx>this.W+60||sx<-60) return;
+    h.t = (h.t||0) + 0.016;
+    if (h.used){
+      h.pop = Math.min(1,(h.pop||0)+0.05);
+      x.save(); x.globalAlpha=0.28*(1-h.pop*0.6);
+      x.strokeStyle='#ffd84a'; x.lineWidth=2;
+      x.beginPath(); x.arc(sx,sy,R*(0.5+h.pop*0.9),0,7); x.stroke();
+      x.restore(); return;
+    }
+    const pulse = 1 + Math.sin(h.t*4)*0.07;
+    x.save();
+    const g=x.createRadialGradient(sx,sy,0,sx,sy,R*2.1);
+    g.addColorStop(0,'rgba(255,216,74,.55)'); g.addColorStop(1,'rgba(255,216,74,0)');
+    x.fillStyle=g; x.beginPath(); x.arc(sx,sy,R*2.1,0,7); x.fill();
+    x.fillStyle='#ffd84a'; x.strokeStyle='#000'; x.lineWidth=2.5;
+    x.beginPath(); x.arc(sx,sy,R*0.62*pulse,0,7); x.fill(); x.stroke();
+    x.strokeStyle='rgba(255,240,170,.9)'; x.lineWidth=2;
+    x.beginPath(); x.arc(sx,sy,R*0.92*pulse,0,7); x.stroke();
+    x.strokeStyle='#000'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(sx,sy+R*0.26); x.lineTo(sx,sy-R*0.26);
+    x.moveTo(sx-R*0.18,sy-R*0.08); x.lineTo(sx,sy-R*0.28); x.lineTo(sx+R*0.18,sy-R*0.08);
+    x.stroke();
+    x.restore();
+  },
+  drawNew(h){
+    const x=this.x, sx=h.x-this.worldX;
+    if (sx>this.W+80||sx+h.w<-80) return;
+    x.save(); x.strokeStyle='#000'; x.lineWidth=2; x.fillStyle=this.pal.obst;
+    if (h.type==='saw'){
+      h.t += 0.06*this.spd;
+      const cx=sx+h.w/2, cy=h.y+h.h/2, r=h.w/2;
+      x.translate(cx,cy); x.rotate(h.t);
+      x.beginPath();
+      for(let i=0;i<10;i++){ const a=i*Math.PI/5, rr=i%2?r*0.62:r;
+        i?x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):x.moveTo(Math.cos(a)*rr,Math.sin(a)*rr); }
+      x.closePath(); x.fill(); x.stroke();
+      x.beginPath(); x.arc(0,0,r*0.28,0,7); x.fillStyle=this.pal.accent; x.fill(); x.stroke();
+    } else if (h.type==='drop'){
+      x.beginPath(); x.moveTo(sx,h.y); x.lineTo(sx+h.w,h.y); x.lineTo(sx+h.w/2,h.y+h.h);
+      x.closePath(); x.fill(); x.stroke();
+    } else if (h.type==='piston'){
+      const up = Math.sin((this.worldX/h.cycle+h.phase)*Math.PI*2)>0.15;
+      const ext = up?1:0.12;
+      x.beginPath(); x.moveTo(sx,h.y+h.h); x.lineTo(sx+h.w/2,h.y+h.h*(1-ext));
+      x.lineTo(sx+h.w,h.y+h.h); x.closePath(); x.fill(); x.stroke();
+    } else if (h.type==='vine'){
+      h.t += 0.04;
+      const sway=Math.sin(h.t)*8;
+      x.strokeStyle=this.pal.accent; x.lineWidth=5; x.lineCap='round';
+      x.beginPath(); x.moveTo(sx+h.w/2,h.y);
+      for(let y=h.y;y<h.y+h.h;y+=18) x.lineTo(sx+h.w/2+Math.sin(h.t+y*0.02)*6, y);
+      x.stroke();
+      x.fillStyle=this.pal.obst;
+      x.beginPath(); x.arc(sx+h.w/2+sway*0.4,h.y+h.h,7,0,7); x.fill();
+      x.strokeStyle='#000'; x.lineWidth=2; x.stroke();
+    }
+    x.restore();
   },
   drawSpike(h){
     const x=this.x, sx=h.x-this.worldX;
@@ -2482,7 +3131,7 @@ const Game = {
     roundRectPath(x,-hw,-hh,hw*2,hh*2,rad);
     x.save(); x.clip();
 
-    const design = designById(Save.d.equipDesign);
+    const design = designById(this.skinId || Save.d.equipDesign);
     x.save();
     try{ design.draw(x, r, this.t); }catch(e){ x.fillStyle='#fff'; x.fillRect(-r,-r,r*2,r*2); }
     x.restore();
@@ -2505,6 +3154,22 @@ const Game = {
 
   drawOverlays(){
     const x=this.x;
+    if (this.ashK>0.01){
+      const k=this.ashK;
+      x.save();
+      x.fillStyle=`rgba(60,14,4,${0.34*k})`; x.fillRect(0,0,this.W,this.H);
+      for (const a of this.ash){
+        x.fillStyle=`rgba(255,${120+a.s*22|0},60,${0.75*k})`;
+        x.beginPath(); x.arc(a.x,a.y,a.s,0,7); x.fill();
+      }
+      x.restore();
+    }
+    if (this.stutFreeze>0){
+      x.save();
+      x.fillStyle='rgba(0,229,176,.12)'; x.fillRect(0,0,this.W,this.H);
+      x.restore();
+    }
+
     /* sandstorm — veil, then gusts, then grit */
     if (this.sandK > 0.01){
       const k = this.sandK, W=this.W, H=this.H;
@@ -2679,6 +3344,7 @@ const UI = {
     if (id==='store'){ this.buildStore(); this.startPreviews(); }
     if (id==='locker'){ this.buildLocker(); this.startPreviews(); }
     if (id==='settings'){ this.buildSettings(); }
+    if (id==='guide'){ this.buildGuide(); }
     if (id!=='splash') Audio2.sfx('ui');
   },
   hideAll(){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show')); this.stopPreviews(); },
@@ -2717,6 +3383,10 @@ const UI = {
     document.getElementById('btnResume').addEventListener('click',()=>this.resume());
     document.getElementById('btnRestart').addEventListener('click',()=>this.restart());
     document.getElementById('btnQuit').addEventListener('click',()=>{ Game.quit(); this.go('home'); });
+    document.querySelectorAll('#guideTabs .tab').forEach(b=>
+      b.addEventListener('click',()=>{ this.guideTab=b.dataset.tab; Audio2.sfx('ui'); this.buildGuide(); }));
+    document.getElementById('cfYes').addEventListener('click',()=>this.closeBuy(true));
+    document.getElementById('cfNo').addEventListener('click',()=>this.closeBuy(false));
     document.getElementById('btnNext').addEventListener('click',()=>this.nextLevel());
     document.getElementById('btnAgain').addEventListener('click',()=>this.restart());
     document.getElementById('btnHome').addEventListener('click',()=>{ Game.quit(); this.go('home'); });
@@ -2744,9 +3414,11 @@ const UI = {
       b.className='lvl'+(unlocked?'':' locked');
       const rules = lv.rules.map(r=>T('lvr_'+r)).join(' · ') || '—';
       b.innerHTML = `<div class="lvlNo">${String(lv.n).padStart(2,'0')}</div>
-        <div><div class="lvlName">${LEVEL_NAMES[lv.key][LANG]||LEVEL_NAMES[lv.key].en}</div>
+        <div><div class="lvlName">${levelName(lv.key)}</div>
         <div class="lvlSub"><span class="diff d-${lv.diff}">${T('d_'+lv.diff)}</span>${worldById(lv.world).name} · ${lv.spd.toFixed(2)}× · ${rules}</div></div>
-        <div class="lvlPct">${unlocked?(best.pct||0)+'%':'🔒'}<br><span style="font-size:9px">${T('st_att')} ${best.att||0}</span></div>`;
+        <div class="lvlPct">${unlocked?(best.pct||0)+'%':'🔒'}
+          <div class="stars">${[1,2,3].map(i=>`<span class="${(best.stars||0)>=i?'on':''}">★</span>`).join('')}</div>
+          <span style="font-size:9px">${T('st_att')} ${best.att||0}</span></div>`;
       if (unlocked) b.addEventListener('click',()=>{ Audio2.sfx('go'); Game.startLevel(lv); });
       wrap.appendChild(b);
     });
@@ -2790,11 +3462,15 @@ const UI = {
     if (Save.owns(id)){
       if (Save.d.equipDesign===id) return;
       Save.d.equipDesign=id; Save.save(); Audio2.sfx('buy'); toast(T('t_equipped'));
-    } else if (Save.d.coins>=d.price){
+      this.buildStore(); this.startPreviews();
+      return;
+    }
+    if (Save.d.coins < d.price){ Audio2.sfx('deny'); toast(T('t_nocoins')); return; }
+    this.askBuy(d, d.price, 'coins', ()=>{
       Save.d.coins-=d.price; Save.d.designs.push(id); Save.d.equipDesign=id; Save.save();
       Audio2.sfx('buy'); toast(T('t_bought'));
-    } else { Audio2.sfx('deny'); toast(T('t_nocoins')); return; }
-    this.buildStore(); this.startPreviews();
+      this.refreshHome(); this.buildStore(); this.startPreviews();
+    });
   },
   buildSkillStore(){
     const g=document.getElementById('skillGrid'); g.innerHTML='';
@@ -2815,15 +3491,187 @@ const UI = {
     if (Save.ownsSkill(id)){
       Save.d.equipSkill = Save.d.equipSkill===id ? null : id;
       Save.save(); Audio2.sfx('buy'); toast(T('t_equipped'));
-    } else if (Save.d.shards>=sk.cost){
+      document.getElementById('stShards').textContent=Save.d.shards;
+      this.buildSkillStore();
+      return;
+    }
+    if (Save.d.shards < sk.cost){ Audio2.sfx('deny'); toast(T('t_noshards')); return; }
+    this.askBuy(sk, sk.cost, 'shards', ()=>{
       Save.d.shards-=sk.cost; Save.d.skills.push(id); Save.d.equipSkill=id; Save.save();
       Audio2.sfx('buy'); toast(T('t_bought'));
-    } else { Audio2.sfx('deny'); toast(T('t_noshards')); return; }
-    document.getElementById('stShards').textContent=Save.d.shards;
-    this.buildSkillStore();
+      document.getElementById('stShards').textContent=Save.d.shards;
+      this.refreshHome(); this.buildSkillStore();
+    });
   },
 
   /* ---------- locker ---------- */
+  /* a purchase is permanent and coins are slow to earn, so it always asks */
+  askBuy(item, price, currency, onYes){
+    const wrap=document.getElementById('confirm');
+    document.getElementById('cfName').textContent = item.name[LANG]||item.name.en;
+    document.getElementById('cfCost').textContent = price+' '+T(currency==='coins'?'cur_coins':'cur_shards');
+    document.getElementById('cfHave').textContent = T('cf_have').replace('%',
+      currency==='coins'?Save.d.coins:Save.d.shards);
+    this.pendingBuy = onYes;
+    wrap.classList.add('show');
+    Audio2.sfx('ui');
+  },
+  closeBuy(ok){
+    document.getElementById('confirm').classList.remove('show');
+    const fn=this.pendingBuy; this.pendingBuy=null;
+    if (ok && fn) fn();
+  },
+  guideTab:'basics',
+  buildGuide(){
+    const tabs=document.getElementById('guideTabs');
+    tabs.querySelectorAll?.('.tab').forEach?.(b=>b.classList.toggle('on', b.dataset.tab===this.guideTab));
+    const body=document.getElementById('guideBody');
+    body.innerHTML='';
+    const t=this.guideTab;
+    const card=(title,text,artFn)=>{
+      const el=document.createElement('div'); el.className='gCard';
+      if (artFn){
+        const cv=document.createElement('canvas');
+        cv.width=132; cv.height=88; cv.className='gArt';
+        el.appendChild(cv);
+        try{ artFn(cv.getContext('2d'),132,88); }catch(_){}
+      }
+      const tx=document.createElement('div'); tx.className='gText';
+      tx.innerHTML='<h4>'+title+'</h4><p>'+text+'</p>';
+      el.appendChild(tx);
+      body.appendChild(el);
+      return el;
+    };
+    const L=s=>(s&&(s[LANG]||s.en))||'';
+
+    if (t==='basics'){
+      const rows=[
+        ['g_b1t','g_b1'],['g_b2t','g_b2'],['g_b3t','g_b3'],
+        ['g_b4t','g_b4'],['g_b5t','g_b5'],['g_b6t','g_b6'],
+      ];
+      rows.forEach(([a,b])=>card(T(a),T(b),null));
+    }
+    else if (t==='worlds'){
+      WORLDS.forEach(w=>{
+        const info=MECH_INFO[w.mech];
+        const own=GUIDE_OBSTACLES.filter(o=>o.scope===w.id);
+        let txt=L(info);
+        if (own.length) txt+='<br><b>'+T('g_only')+'</b> '+own.map(o=>L(o.name)).join(', ');
+        card(w.name, txt, (g,cw,ch)=>this.artWorld(g,cw,ch,w));
+      });
+    }
+    else if (t==='obst'){
+      const head=document.createElement('div');
+      head.className='gHead'; head.textContent=T('g_common');
+      body.appendChild(head);
+      GUIDE_OBSTACLES.filter(o=>o.scope==='common').forEach(o=>
+        card(L(o.name), L(o.tip), (g,cw,ch)=>this.artObstacle(g,cw,ch,o.art)));
+      const h2=document.createElement('div');
+      h2.className='gHead'; h2.textContent=T('g_special');
+      body.appendChild(h2);
+      GUIDE_OBSTACLES.filter(o=>o.scope!=='common').forEach(o=>{
+        const w=worldById(o.scope);
+        card(L(o.name)+' <em>'+(w?w.name:o.scope)+'</em>', L(o.tip),
+          (g,cw,ch)=>this.artObstacle(g,cw,ch,o.art));
+      });
+    }
+    else {
+      SKILLS.forEach(sk=>{
+        const owned=Save.ownsSkill(sk.id);
+        const meta=T('g_dur').replace('%1',sk.dur>0?sk.dur+'s':'—').replace('%2',sk.cd+'s');
+        const txt='<span class="gMeta">'+meta+'</span>'+L(sk.desc)+
+          '<br><b>'+T('g_good')+'</b> '+L(SKILL_COUNTERS[sk.id])+
+          (owned?'':'<br><span class="gLock">'+T('g_locked')+'</span>');
+        card(sk.icon+'  '+L(sk.name), txt, null);
+      });
+    }
+  },
+
+  /* small drawings so an obstacle is recognisable before you meet it */
+  artWorld(g,w,h,world){
+    const p=world.pal;
+    const sky=g.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0,p.sky1); sky.addColorStop(1,p.sky2);
+    g.fillStyle=sky; g.fillRect(0,0,w,h);
+    g.fillStyle=p.ground; g.fillRect(0,h-18,w,18);
+    g.strokeStyle='#000'; g.lineWidth=1.5; g.beginPath(); g.moveTo(0,h-18); g.lineTo(w,h-18); g.stroke();
+    g.fillStyle=p.obst; g.strokeStyle='#000';
+    g.beginPath(); g.moveTo(w*0.62,h-18); g.lineTo(w*0.70,h-34); g.lineTo(w*0.78,h-18);
+    g.closePath(); g.fill(); g.stroke();
+    g.fillStyle='#fff'; g.strokeStyle='#000';
+    g.beginPath(); g.arc(w*0.28,h-28,10,0,7); g.fill(); g.stroke();
+    g.fillStyle='#000';
+    g.beginPath(); g.arc(w*0.28-5,h-28,2.2,0,7); g.fill();
+    g.beginPath(); g.arc(w*0.28+5,h-28,2.2,0,7); g.fill();
+    g.fillStyle=p.accent; g.globalAlpha=.5; g.fillRect(0,0,w,4); g.globalAlpha=1;
+  },
+  artObstacle(g,w,h,kind){
+    const G=h-18;
+    g.fillStyle='#0d0d0d'; g.fillRect(0,0,w,h);
+    const floor=(x0,x1)=>{ g.fillStyle='#e9e9e9'; g.fillRect(x0,G,x1-x0,18);
+      g.strokeStyle='#000'; g.lineWidth=1.5; g.beginPath(); g.moveTo(x0,G); g.lineTo(x1,G); g.stroke(); };
+    const tri=(x,y,s)=>{ g.fillStyle='#e9e9e9'; g.strokeStyle='#000'; g.lineWidth=1.4;
+      g.beginPath(); g.moveTo(x,y); g.lineTo(x+s/2,y-s); g.lineTo(x+s,y); g.closePath(); g.fill(); g.stroke(); };
+    const box=(x,y,bw,bh,c)=>{ g.fillStyle=c||'#e9e9e9'; g.strokeStyle='#000'; g.lineWidth=1.4;
+      g.fillRect(x,y,bw,bh); g.strokeRect(x,y,bw,bh); };
+    const ball=(x,y)=>{ g.fillStyle='#fff'; g.strokeStyle='#000'; g.lineWidth=1.4;
+      g.beginPath(); g.arc(x,y,9,0,7); g.fill(); g.stroke();
+      g.fillStyle='#000'; g.beginPath(); g.arc(x-4.5,y,2,0,7); g.fill();
+      g.beginPath(); g.arc(x+4.5,y,2,0,7); g.fill(); };
+    const arrow=(x,y)=>{ g.strokeStyle='#7be3ff'; g.lineWidth=2; g.beginPath();
+      g.moveTo(x,y); g.lineTo(x,y-16); g.moveTo(x-4,y-11); g.lineTo(x,y-16); g.lineTo(x+4,y-11); g.stroke(); };
+    switch(kind){
+      case 'spikes': floor(0,w); tri(58,G,14); tri(74,G,14); tri(90,G,14); ball(26,G-9); break;
+      case 'gap':    floor(0,46); floor(94,w); ball(24,G-9); break;
+      case 'gap2':   floor(0,34); floor(58,76); floor(102,w); ball(18,G-9); break;
+      case 'plat':   floor(0,w); box(52,G-34,54,8); ball(24,G-9); break;
+      case 'steps':  floor(0,44); g.fillStyle='#e9e9e9'; g.fillRect(44,G-14,32,32); g.strokeRect(44,G-14,32,32);
+                     g.fillRect(76,G-28,56,46); g.strokeRect(76,G-28,56,46); ball(22,G-9); break;
+      case 'ceil':   floor(0,w); box(48,0,60,52); ball(24,G-6); break;
+      case 'mover':  floor(0,w); box(74,G-46,20,20); arrow(84,G-50); ball(28,G-9); break;
+      case 'bridge': floor(0,42); g.fillStyle='#e9e9e9'; g.fillRect(42,G-26,72,44); g.strokeRect(42,G-26,72,44);
+                     tri(92,G-26,13); floor(114,w); ball(20,G-9); break;
+      case 'stairs': floor(0,w); for(let i=0;i<3;i++) tri(30+i*16,G,13);
+                     box(44,G-24,26,7); box(74,G-38,26,7); box(104,G-52,26,7); ball(16,G-9); break;
+      case 'orb':    floor(0,w); g.fillStyle='#ffd23f'; g.strokeStyle='#000';
+                     g.beginPath(); g.arc(78,G-30,11,0,7); g.fill(); g.stroke();
+                     arrow(78,G-44); ball(30,G-9); break;
+      case 'saw':    floor(0,w); g.fillStyle='#e9e9e9'; g.strokeStyle='#000';
+                     g.beginPath(); for(let i=0;i<10;i++){const a=i*Math.PI/5,r=i%2?9:15;
+                       const x=78+Math.cos(a)*r,y=G-4+Math.sin(a)*r; i?g.lineTo(x,y):g.moveTo(x,y);}
+                     g.closePath(); g.fill(); g.stroke(); ball(28,G-9); break;
+      case 'drop':   floor(0,w); [56,80,104].forEach(x=>{ g.fillStyle='#e9e9e9'; g.strokeStyle='#000';
+                       g.beginPath(); g.moveTo(x-7,0); g.lineTo(x+7,0); g.lineTo(x,22); g.closePath(); g.fill(); g.stroke(); });
+                     ball(24,G-6); break;
+      case 'crumble':floor(0,34); box(34,G-2,30,7); box(68,G-2,30,7,'#8a8a8a'); box(102,G-2,30,7,'#5a5a5a'); ball(20,G-11); break;
+      case 'piston': floor(0,w); tri(52,G,14); g.globalAlpha=.35; tri(92,G,14); g.globalAlpha=1; ball(22,G-9); break;
+      case 'pillars':floor(0,26); [34,66,98].forEach(x=>box(x,G-14,12,32)); ball(14,G-9); break;
+      case 'tunnel': floor(0,w); box(30,0,34,52); box(92,0,34,52); ball(78,G-13); break;
+      case 'lift':   floor(0,34); floor(106,w); box(56,G-30,40,8); arrow(76,G-34); ball(20,G-9); break;
+      case 'wall':   floor(0,w); box(84,G-56,14,56); tri(102,G,14);
+                     g.fillStyle='#ffd23f'; g.strokeStyle='#000';
+                     g.beginPath(); g.arc(52,G-26,10,0,7); g.fill(); g.stroke(); ball(22,G-9); break;
+      case 'zigzag': floor(0,w); box(40,G-20,22,7); box(66,G-40,22,7); box(92,G-20,22,7); ball(20,G-9); break;
+      case 'chasm':  floor(0,28); floor(112,w); g.fillStyle='#ffd23f'; g.strokeStyle='#000';
+                     [[52,G-22],[84,G-42]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,9,0,7);g.fill();g.stroke();});
+                     ball(16,G-9); break;
+      case 'gum':    floor(0,w); g.fillStyle='#ff8fc4'; g.strokeStyle='#000';
+                     g.beginPath(); g.ellipse(80,G-3,20,8,0,0,7); g.fill(); g.stroke(); ball(30,G-9); break;
+      case 'fall':   g.fillStyle='#e9e9e9'; g.fillRect(0,G,w,18);
+                     g.strokeStyle='rgba(255,42,23,.8)'; g.lineWidth=2;
+                     [44,88].forEach(x=>{g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();});
+                     box(52,16,26,26,'#1a1a1a'); ball(110,G-9); break;
+      case 'bar':    g.fillStyle='#e9e9e9'; g.fillRect(0,G,w,18);
+                     g.strokeStyle='rgba(255,42,23,.8)'; g.lineWidth=2;
+                     [44,88].forEach(x=>{g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();});
+                     box(8,28,116,12,'#1a1a1a'); ball(66,G-6); break;
+      case 'vine':   floor(0,w); g.strokeStyle='#3f7a37'; g.lineWidth=4; g.lineCap='round';
+                     [50,78,106].forEach(x=>{g.beginPath();g.moveTo(x,0);
+                       for(let y=0;y<44;y+=8)g.lineTo(x+Math.sin(y*0.2)*4,y); g.stroke();});
+                     ball(22,G-9); break;
+      default: floor(0,w); ball(w/2,G-9);
+    }
+  },
   buildLocker(){
     const storeIds = rollStore();
     const g=document.getElementById('lTabDesign'); g.innerHTML=''; this.previews=[];
@@ -2932,6 +3780,16 @@ const UI = {
     row(T('set_flash'),sw('flash'));
     row(T('set_lefty'),sw('lefty',()=>document.body.classList.toggle('lefty',S.lefty)));
     row(T('set_fps'),sw('fps'));
+    {
+      const b=document.createElement('button');
+      b.className='sw'+(Save.d.randomDesign?' on':'');
+      b.innerHTML='<i></i>';
+      b.addEventListener('click',()=>{
+        Save.d.randomDesign=!Save.d.randomDesign; Save.save();
+        b.classList.toggle('on',Save.d.randomDesign); Audio2.sfx('ui');
+      });
+      row(T('set_random'), b);
+    }
 
     /* ---------- rebindable controls (keyboard only) ---------- */
     if (!matchMedia('(pointer:coarse)').matches){
@@ -2991,7 +3849,6 @@ const UI = {
     document.getElementById('sTime').textContent = G.t.toFixed(1);
     document.getElementById('sScore').textContent = Math.floor(G.score);
     document.getElementById('sJump').textContent = s.jumps;
-    document.getElementById('sDjump').textContent = s.djumps;
     document.getElementById('sSlow').textContent = s.slows;
     document.getElementById('sCrouch').textContent = s.crouches;
     const sk = Save.d.equipSkill ? (skillById(Save.d.equipSkill).name[LANG]||skillById(Save.d.equipSkill).name.en) : '—';
@@ -3006,6 +3863,12 @@ const UI = {
       document.getElementById('progPct').textContent=Math.floor(pct*100)+'%';
     }
     // cooldown ring
+    const nx=document.getElementById('nextWorld');
+    if (nx){
+      const show = G.mode==='chal' && G.state==='run' && G.spd<2;
+      nx.classList.toggle('hide', !show);
+      if (show) nx.textContent = T('hud_next')+' '+Math.max(0,Math.ceil(G.stepT))+'s';
+    }
     const ring=document.querySelector('#cdRing circle'), txt=document.getElementById('cdText');
     const id=Save.d.equipSkill, S=id?skillById(id):null;
     let k=0;
@@ -3072,11 +3935,21 @@ const UI = {
     const T_ = k=>T(k);
     let title, kick;
     if (kind==='win'){ title=T_('o_win'); kick='02:00 · 2.00×'; }
-    else if (kind==='clear'){ title=T_('o_clear'); kick=(LEVEL_NAMES[Game.level.key][LANG]||LEVEL_NAMES[Game.level.key].en).toUpperCase(); }
+    else if (kind==='clear'){ title=T_('o_clear'); kick=levelName(Game.level.key).toUpperCase(); }
     else if (kind==='wall'){ title=T_('o_wall'); kick=T_('o_run'); }
     else { title=T_('o_over'); kick=T_('o_run'); }
     document.getElementById('overTitle').textContent=title;
     document.getElementById('overKick').textContent=kick;
+
+    // three stars: finished / no skill used / every coin on the route
+    const starWrap=document.getElementById('overStars');
+    if (kind==='clear' && Game.mode==='adv'){
+      const got=Game.runStars||1;
+      starWrap.className='overStars show';
+      starWrap.innerHTML=[1,2,3].map(i=>`<span class="${got>=i?'on':''}" style="animation-delay:${i*0.16}s">★</span>`).join('')
+        + `<div class="starWhy">${[T('star_1'),T('star_2'),T('star_3')]
+            .map((t,i)=>`<em class="${got>=i+1?'on':''}">${t}</em>`).join('')}</div>`;
+    } else starWrap.className='overStars';
 
     const st=document.getElementById('overStats');
     const cells=[];
@@ -3111,19 +3984,34 @@ const UI = {
 
 /* level display names live here so data.js stays language-agnostic */
 const LEVEL_NAMES = {
-  l1:{en:'First Steps',fr:'Premiers Pas'},
-  l2:{en:'Mind the Hole',fr:'Attention au Trou'},
-  l3:{en:'Sandline',fr:'Ligne de Sable'},
-  l4:{en:'Duck Season',fr:'Baisse la Tête'},
-  l5:{en:'Blink',fr:'Clignement'},
-  l6:{en:'Sticky',fr:'Collant'},
-  l7:{en:'Upside',fr:'À l\'Envers'},
-  l8:{en:'Descent',fr:'Descente'},
-  l9:{en:'Ghost Run',fr:'Course Fantôme'},
-  l10:{en:'Reverse Storm',fr:'Tempête Inversée'},
-  l11:{en:'Bubblewrapped',fr:'Empapillonné'},
-  l12:{en:'MALIK',fr:'MALIK'},
+  l1: {en:'First Steps',    fr:'Premiers Pas'},
+  l2: {en:'Undergrowth',    fr:'Sous-Bois'},
+  l3: {en:'Mind the Hole',  fr:'Attention au Trou'},
+  l4: {en:'Sandline',       fr:'Ligne de Sable'},
+  l5: {en:'Weightless',     fr:'En Apesanteur'},
+  l6: {en:'Blink',          fr:'Clignement'},
+  l7: {en:'Sticky',         fr:'Collant'},
+  l8: {en:'Duck Season',    fr:'Baisse la Tête'},
+  l9: {en:'Through Glass',  fr:'À Travers le Verre'},
+  l10:{en:'Upside',         fr:'À l\'Envers'},
+  l11:{en:'Ashfall',        fr:'Pluie de Cendres'},
+  l12:{en:'Three Lines',    fr:'Trois Lignes'},
+  l13:{en:'Dead Weight',    fr:'Poids Mort'},
+  l14:{en:'Skipping',       fr:'Saccades'},
+  l15:{en:'The Long Drop',  fr:'La Longue Chute'},
+  l16:{en:'Ghost Run',      fr:'Course Fantôme'},
+  l17:{en:'Bubblewrapped',  fr:'Empapillonné'},
+  l18:{en:'Hall of Mirrors',fr:'Galerie des Glaces'},
+  l19:{en:'Emberline',      fr:'Ligne de Braise'},
+  l20:{en:'Reverse Storm',  fr:'Tempête Inversée'},
+  l21:{en:'Nullstate',      fr:'État Nul'},
+  l22:{en:'MALIK',          fr:'MALIK'},
 };
+/* never let a missing name take down the whole screen again */
+function levelName(key){
+  const n = LEVEL_NAMES[key];
+  return n ? (n[LANG]||n.en) : key.toUpperCase();
+}
 
 /* dev code: tap M three times inside 800ms for 999 of each currency */
 (()=>{
