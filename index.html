@@ -240,7 +240,16 @@ body.touch #touchCtl{display:block}
 #tLeft{left:18px;bottom:114px}
 #tRight{left:104px;bottom:114px}
 .tbtn.lane{display:none}
-body.touch.lanes .tbtn.lane{display:grid}
+/* Malik has no jump: the jump pad becomes the right arrow, left sits beside it */
+body.touch.lanes #tJump{display:none}
+body.touch.lanes .tbtn.lane{display:grid;bottom:18px;left:auto;width:92px;height:92px;font-size:30px}
+body.touch.lanes #tRight{right:18px}
+body.touch.lanes #tLeft{right:120px}
+body.touch.lanes.lefty #tRight{right:auto;left:120px}
+body.touch.lanes.lefty #tLeft{right:auto;left:18px}
+body.tight.touch.lanes .tbtn.lane{width:72px;height:72px;font-size:24px;bottom:12px}
+body.tight.touch.lanes #tRight{right:12px}
+body.tight.touch.lanes #tLeft{right:92px}
 body.lefty #tCrouch{left:auto;right:18px}
 body.lefty #tJump{right:auto;left:18px}
 body.lefty #tLeft{left:auto;right:104px}
@@ -257,6 +266,18 @@ body.tight #skillIcon{font-size:22px}
 body.tight #statBox{font-size:8px;padding:5px 7px;max-width:150px}
 body.tight #worldTag{font-size:16px}
 body.tight #speedTag{font-size:20px}
+
+.setHead{font-family:var(--mono);font-size:10px;letter-spacing:.28em;color:var(--sig);
+  padding:16px 0 4px;border-top:1px solid var(--line);margin-top:10px}
+.keyBtn{min-width:104px;padding:8px 12px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;transition:.14s}
+.keyBtn:hover{background:#fff;color:#000;border-color:#fff}
+.keyBtn.wide{min-width:180px}
+.keyBtn.listening{background:var(--sig);border-color:var(--sig);color:#fff;animation:pulseKey .9s infinite}
+@keyframes pulseKey{0%,100%{opacity:1}50%{opacity:.55}}
+.skillBtn.active{border-color:#7be3ff;box-shadow:0 0 0 2px rgba(123,227,255,.35)}
+.skillBtn.active #cdRing circle{stroke:#7be3ff}
+.skillBtn.auto{opacity:.85;cursor:default}
 
 /* ---------- countdown ---------- */
 #countdown{position:absolute;inset:0;display:grid;place-items:center;z-index:30;pointer-events:none;
@@ -488,22 +509,25 @@ body.tight #speedTag{font-size:20px}
    Config, worlds, designs, skills, adventure levels, i18n.
    ============================================================ */
 
+/* Geometry Dash builds on a square grid: the cube is exactly one block, spikes
+   fill one block, and the camera shows ~10 blocks of height. Everything below is
+   sized off GRID so the game reads at the same scale. */
 const CFG = {
   W: 960, H: 540,
-  GROUND_H: 90,
-  GROUND_Y: 450,          // top of the floor
-  PX: 420,                // px/sec at 1.00x
-  G: 2400,                // gravity
-  JUMP: 820,
-  DJUMP: 745,
+  GRID: 52,               // one block. the ball is exactly this wide.
+  GROUND_H: 72,
+  GROUND_Y: 468,          // top of the floor = 9 blocks of air above it
+  PX: 430,                // px/sec at 1.00x
+  G: 2840,                // gravity
+  JUMP: 860,              // apex 130px = 2.5 blocks
+  DJUMP: 780,
   SLOW_G: 0.30,           // gravity multiplier while gliding
-  SLOW_MAX: 250,          // terminal velocity while gliding
-  R: 22,                  // player radius
-  PLAYER_X: 250,          // fixed screen x
-  RUN_TIME: 120,          // two-minute challenge
-  BARRIER_GAP: 235,       // how far the wall trails the player
-  BARRIER_CATCHUP: 58,   // px/s the wall closes when player is slowed
-  SKILL_CD: 10,
+  SLOW_MAX: 260,          // terminal velocity while gliding
+  R: 26,                  // player radius — one block across
+  PLAYER_X: 260,          // fixed screen x
+  MAX_SURVIVE: 120,       // seconds to hold at 2.00x to win
+  BARRIER_GAP: 250,       // how far the wall trails the player
+  BARRIER_CATCHUP: 62,    // px/s the wall closes when player is slowed
   COIN_CHANCE: 0.075,
   SHARD_CHANCE: 0.011,
 };
@@ -514,14 +538,17 @@ const SPEED_STEPS = (() => {
   const a = [];
   for (let i = 0; i <= 20; i++) {
     const spd = +(1 + i * 0.05).toFixed(2);
-    // 4.6s at 1.00x growing to 6.5s at 1.95x — ~111s to reach max, then the finale
-    const dur = i === 20 ? 9999 : +(4.6 + i * 0.10).toFixed(2);
+    // a minute on the first world, five seconds less after every switch,
+    // never dropping under five. At 2.00x the survival clock takes over.
+    const dur = i === 20 ? 9999 : Math.max(5, 60 - i * 5);
     a.push({ spd, dur });
   }
   return a;
 })();
 // Obstacle-free runway after a world switch, on top of the terrain already committed.
 const breakTime = s => 1.05 + (s - 1) * 1.05;
+// never let the runway eat a whole stage once stages get short
+const cappedBreak = (s, stageDur) => Math.min(breakTime(s), Math.max(0.8, stageDur*0.35));
 // How much already-visible terrain stays put before the new world takes over.
 const COMMIT_TIME = 0.75;
 
@@ -612,18 +639,31 @@ const designById = id => DESIGNS.find(d => d.id === id) || DESIGNS[0];
 const RARITIES = ['common','rare','epic','legendary'];
 
 /* ================= SKILLS ================= */
+/* dur = how long the effect lasts. cd = cooldown, which only starts ticking
+   once the effect has worn off. trigger tells the input layer what fires it. */
 const SKILLS = [
-  { id:'fade',    icon:'◍', cost:1, name:{en:'Fade',fr:'Estompe'},
-    desc:{en:'Turn translucent and pass through obstacles for 5s.',fr:'Devient translucide et traverse les obstacles pendant 5 s.'} },
-  { id:'triple',  icon:'⇈', cost:1, name:{en:'Triple Jump',fr:'Triple Saut'},
-    desc:{en:'Gain a third mid-air jump for 5s.',fr:'Ajoute un troisième saut aérien pendant 5 s.'} },
-  { id:'revive',  icon:'✚', cost:1, name:{en:'Revive',fr:'Réanimation'},
-    desc:{en:'Fires automatically on death and continues the run. Cannot save you from the wall.',fr:'S\'active à la mort et poursuit la partie. Ne protège pas du mur.'} },
-  { id:'dash',    icon:'⇥', cost:1, name:{en:'Dash',fr:'Ruée'},
-    desc:{en:'Burst forward, shredding anything in the way.',fr:'Fonce vers l\'avant en détruisant tout sur le passage.'} },
-  { id:'cleanse', icon:'✧', cost:1, name:{en:'Cleanse',fr:'Purge'},
-    desc:{en:'Clears world effects that block sight or movement for 5s.',fr:'Efface les effets de monde gênants pendant 5 s.'} },
+  { id:'fade',    icon:'◍', cost:1, dur:2,    cd:15, trigger:'key',
+    name:{en:'Fade',fr:'Estompe'},
+    desc:{en:'Turn translucent and pass through obstacles for 2s. 15s cooldown.',fr:'Devient translucide et traverse les obstacles pendant 2 s. Recharge 15 s.'} },
+  { id:'triple',  icon:'⇈', cost:1, dur:5,    cd:10, trigger:'jump',
+    name:{en:'Triple Jump',fr:'Triple Saut'},
+    desc:{en:'A third mid-air jump for 5s. Fires from the jump control. 10s cooldown.',fr:'Un troisième saut aérien pendant 5 s. Se déclenche avec le saut. Recharge 10 s.'} },
+  { id:'revive',  icon:'✚', cost:1, dur:0,    cd:30, trigger:'auto',
+    name:{en:'Revive',fr:'Réanimation'},
+    desc:{en:'Fires by itself on death. No button. 30s cooldown. Cannot save you from the wall.',fr:'S\'active seule à la mort. Aucun bouton. Recharge 30 s. Ne protège pas du mur.'} },
+  { id:'dash',    icon:'⇥', cost:1, dur:0.45, cd:10, trigger:'key',
+    name:{en:'Dash',fr:'Ruée'},
+    desc:{en:'Burst forward, shredding anything in the way. 10s cooldown.',fr:'Fonce vers l\'avant en détruisant tout sur le passage. Recharge 10 s.'} },
+  { id:'cleanse', icon:'✧', cost:1, dur:5,    cd:15, trigger:'key',
+    name:{en:'Cleanse',fr:'Purge'},
+    desc:{en:'Clears sight- and movement-blocking world effects for 5s. 15s cooldown.',fr:'Efface les effets de monde gênants pendant 5 s. Recharge 15 s.'} },
 ];
+/* rebindable keyboard controls */
+const DEFAULT_KEYS = {
+  jump:'Space', jumpAlt:'KeyW', crouch:'KeyS', crouchAlt:'ArrowDown',
+  skill:'KeyP', laneLeft:'KeyA', laneRight:'KeyD', pause:'Escape'
+};
+const KEY_ACTIONS = ['jump','jumpAlt','crouch','crouchAlt','skill','laneLeft','laneRight','pause'];
 const skillById = id => SKILLS.find(s => s.id === id) || null;
 
 /* ================= ADVENTURE LEVELS ================= */
@@ -648,7 +688,7 @@ const I18N = {
     h_kick:'ENDLESS RUN · REACT OR RESTART', h_best:'BEST', h_coins:'COINS', h_shards:'SHARDS',
     m_play:'PLAY', m_store:'STORE', m_locker:'LOCKER', m_set:'SETTINGS',
     mo_title:'SELECT MODE', mo_c:'TWO MINUTES', mo_a:'ADVENTURE',
-    mo_cd:'Worlds rotate. Speed climbs from 1.00× to 2.00×. Survive the full two minutes to win.',
+    mo_cd:'Worlds rotate every minute, five seconds sooner each time. Speed climbs 1.00× to 2.00×, then hold on for two minutes to win.',
     mo_ad:'Fixed levels, fixed speed, one rule each. Finish a level to unlock the next.',
     a_title:'ADVENTURE', a_done:'CLEARED', a_locked:'LOCKED',
     s_title:'STORE', s_design:'DESIGNS', s_skill:'SKILLS', s_refresh:'NEW SELECTION IN',
@@ -661,6 +701,10 @@ const I18N = {
     o_next:'NEXT LEVEL', o_alldone:'ALL LEVELS CLEARED', o_again:'TRY AGAIN', o_home:'MENU', o_over:'GAME OVER', o_win:'YOU SURVIVED',
     o_clear:'LEVEL CLEAR', o_wall:'THE WALL CAUGHT YOU', o_run:'RUN ENDED',
     o_best:'BEST', o_score:'SCORE', o_time:'TIME', o_prog:'PROGRESS',
+    set_keys:'CONTROLS', key_jump:'Jump', key_jumpAlt:'Jump (alt)', key_crouch:'Crouch',
+    key_crouchAlt:'Crouch (alt)', key_skill:'Use skill', key_laneLeft:'Move left',
+    key_laneRight:'Move right', key_pause:'Pause', key_press:'PRESS A KEY',
+    key_reset:'RESET CONTROLS',
     set_lang:'Language', set_sfx:'Sound effects', set_mus:'Music',
     set_musvol:'Music volume', set_sfxvol:'Effects volume',
     set_pitch:'Music pitch follows speed', set_pitch_d:'Off keeps the original pitch while still speeding up.',
@@ -680,7 +724,7 @@ const I18N = {
     h_kick:'COURSE SANS FIN · RÉAGIS OU RECOMMENCE', h_best:'RECORD', h_coins:'PIÈCES', h_shards:'ÉCLATS',
     m_play:'JOUER', m_store:'BOUTIQUE', m_locker:'CASIER', m_set:'RÉGLAGES',
     mo_title:'CHOISIR UN MODE', mo_c:'DEUX MINUTES', mo_a:'AVENTURE',
-    mo_cd:'Les mondes tournent. La vitesse monte de 1,00× à 2,00×. Tiens deux minutes pour gagner.',
+    mo_cd:'Les mondes changent chaque minute, cinq secondes plus tôt à chaque fois. La vitesse monte de 1,00× à 2,00×, puis tiens deux minutes pour gagner.',
     mo_ad:'Niveaux fixes, vitesse fixe, une règle chacun. Termine un niveau pour ouvrir le suivant.',
     a_title:'AVENTURE', a_done:'TERMINÉS', a_locked:'VERROUILLÉ',
     s_title:'BOUTIQUE', s_design:'DESIGNS', s_skill:'COMPÉTENCES', s_refresh:'NOUVELLE SÉLECTION DANS',
@@ -693,6 +737,10 @@ const I18N = {
     o_next:'NIVEAU SUIVANT', o_alldone:'TOUS LES NIVEAUX TERMINÉS', o_again:'RÉESSAYER', o_home:'MENU', o_over:'PARTIE TERMINÉE', o_win:'TU AS SURVÉCU',
     o_clear:'NIVEAU RÉUSSI', o_wall:'LE MUR T\'A RATTRAPÉ', o_run:'COURSE TERMINÉE',
     o_best:'RECORD', o_score:'SCORE', o_time:'TEMPS', o_prog:'PROGRESSION',
+    set_keys:'COMMANDES', key_jump:'Saut', key_jumpAlt:'Saut (alt)', key_crouch:'Accroupi',
+    key_crouchAlt:'Accroupi (alt)', key_skill:'Utiliser la compétence', key_laneLeft:'Aller à gauche',
+    key_laneRight:'Aller à droite', key_pause:'Pause', key_press:'APPUIE SUR UNE TOUCHE',
+    key_reset:'RÉINITIALISER LES COMMANDES',
     set_lang:'Langue', set_sfx:'Effets sonores', set_mus:'Musique',
     set_musvol:'Volume musique', set_sfxvol:'Volume effets',
     set_pitch:'La musique suit la vitesse', set_pitch_d:'Désactivé garde la hauteur d\'origine.',
@@ -717,6 +765,20 @@ const I18N = {
    ============================================================ */
 
 /* ---------- math / rng ---------- */
+const smoothstep = t => t*t*(3-2*t);
+/* turn a KeyboardEvent.code into something a person can read on a button */
+function keyLabel(code){
+  if (!code) return '—';
+  if (code==='Space') return 'SPACE';
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  if (code.startsWith('Numpad')) return 'NUM '+code.slice(6).toUpperCase();
+  if (code.startsWith('Arrow')) return {Up:'↑',Down:'↓',Left:'←',Right:'→'}[code.slice(5)]||code;
+  return ({ShiftLeft:'L SHIFT',ShiftRight:'R SHIFT',ControlLeft:'L CTRL',ControlRight:'R CTRL',
+    AltLeft:'L ALT',AltRight:'R ALT',Escape:'ESC',Enter:'ENTER',Tab:'TAB',Backquote:'`',
+    Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Semicolon:';',Quote:"'",
+    Comma:',',Period:'.',Slash:'/',Backslash:'\\'}[code]) || code.toUpperCase();
+}
 const clamp = (v,a,b)=>v<a?a:v>b?b:v;
 const lerp  = (a,b,t)=>a+(b-a)*t;
 const rand  = (a,b)=>a+Math.random()*(b-a);
@@ -759,6 +821,7 @@ const DEFAULT_SAVE = {
   store:{ day:-1, ids:[] },
   adventure:{ unlocked:1, best:{}, cleared:[] },
   totals:{ jumps:0, djumps:0, slows:0, crouches:0, skills:0, runs:0 },
+  keys:Object.assign({}, DEFAULT_KEYS),
   set:{ sfx:true, music:true, musVol:0.7, sfxVol:0.8, pitch:true,
         shake:true, particles:true, flash:false, lefty:false, fps:false }
 };
@@ -792,11 +855,13 @@ function rollStore(){
   if (Save.d.store.day === day && Save.d.store.ids.length === 5) return Save.d.store.ids;
   // seed mixes the player's private id with the day → nobody sees the same 5
   const rng = makeRNG(hashStr(Save.d.seedId + ':' + day));
+  // 'classic' is the starter design — everyone already has it, so it never rotates in
+  const sellable = DESIGNS.filter(d=>d.id!=='classic' && d.rar!=='exclusive');
   const pools = {
-    common: DESIGNS.filter(d=>d.rar==='common'),
-    rare: DESIGNS.filter(d=>d.rar==='rare'),
-    epic: DESIGNS.filter(d=>d.rar==='epic'),
-    legendary: DESIGNS.filter(d=>d.rar==='legendary'),
+    common: sellable.filter(d=>d.rar==='common'),
+    rare: sellable.filter(d=>d.rar==='rare'),
+    epic: sellable.filter(d=>d.rar==='epic'),
+    legendary: sellable.filter(d=>d.rar==='legendary'),
   };
   const weights = { common:44, rare:32, epic:18, legendary:6 };
   const ids = [];
@@ -807,7 +872,7 @@ function rollStore(){
     if (pick && !ids.includes(pick.id)) ids.push(pick.id);
   }
   // guarantee at least one item the player doesn't own yet, if any exist
-  const unowned = DESIGNS.filter(d=>d.rar!=='exclusive' && !Save.owns(d.id));
+  const unowned = sellable.filter(d=>!Save.owns(d.id));
   if (unowned.length && ids.every(id=>Save.owns(id))) ids[4] = rng.pick(unowned).id;
   Save.d.store = { day, ids };
   Save.save();
@@ -990,11 +1055,16 @@ function toast(msg){
    ============================================================ */
 
 const GY = CFG.GROUND_Y;
-const SPIKE_W = 26, SPIKE_H = 28;
+const B  = CFG.GRID;                    // one block — everything is a multiple of this
+const SPIKE_W = B, SPIKE_H = B;         // GD spikes fill a whole block
 
 /* jump reach helpers */
-const jumpH = () => (CFG.JUMP*CFG.JUMP)/(2*CFG.G);            // ~140
-const jumpDist = spd => CFG.PX*spd * (2*CFG.JUMP/CFG.G);      // 287 @1x … 574 @2x
+const jumpH = () => (CFG.JUMP*CFG.JUMP)/(2*CFG.G);            // 130 = 2.5 blocks
+const jumpDist = spd => CFG.PX*spd * (2*CFG.JUMP/CFG.G);      // 260 @1x … 520 @2x
+const blocks = n => n*B;
+/* obstacle geometry is fixed in blocks, exactly like GD — speed changes the
+   jump arc and your reaction window, not the size of anything on screen. */
+const reachBlocks = spd => jumpDist(spd)/B;
 
 function ground(o,x,w,top){ o.solids.push({kind:'ground',x,y:top===undefined?GY:top,w,h:CFG.H-(top===undefined?GY:top)+40}); }
 function block(o,x,y,w,h,kind){ o.solids.push({kind:kind||'block',x,y,w,h}); }
@@ -1015,7 +1085,7 @@ const PATTERNS = {
 
   /* plain run — breathing room */
   flat(o,x,c){
-    const w = c.rng.range(140, 240);
+    const w = blocks(c.rng.int(3,5));
     ground(o,x,w);
     return w;
   },
@@ -1023,163 +1093,151 @@ const PATTERNS = {
   /* ground spikes, stackable like GD */
   spikes(o,x,c){
     const groups = c.hard ? c.rng.int(2,3) : c.rng.int(1,2);
-    const gapBetween = Math.max(150, jumpDist(c.spd)*0.55);
-    let w = 70;
+    // landing room between rows, in whole blocks, never wider than one arc
+    const gapB = clamp(Math.round(reachBlocks(c.spd)*0.55), 3, 6);
+    let w = blocks(2);
     for (let i=0;i<groups;i++){
-      // width of the row is the difficulty dial, not height
-      const n = +c.rng.weighted(c.hard ? {1:2,2:4,3:3,4:1} : {1:6,2:3,3:1});
+      const n = +c.rng.weighted(c.hard ? {1:3,2:4,3:2} : {1:6,2:3});
       spike(o, x+w, GY, n);
-      if (c.rng.chance(0.35)) coinAt(o, x+w+SPIKE_W*n/2, GY-SPIKE_H-64, c.rng);
-      w += SPIKE_W*n + gapBetween;
+      if (c.rng.chance(0.35)) coinAt(o, x+w+SPIKE_W*n/2, GY-SPIKE_H-blocks(1), c.rng);
+      w += blocks(n + gapB);
     }
-    w += 70;
+    w += blocks(2);
     ground(o,x,w);
     return w;
   },
 
   /* a hole in the floor */
   gap(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(90, jd*0.30);
-    const gw = jd * c.rng.range(c.hard?0.36:0.26, c.hard?0.52:0.42) * (c.rules.gaps?1.12:1);
-    const tail = Math.max(110, jd*0.36);
+    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.62), 2, c.rules.gaps?5:4);
+    const lead = blocks(3);
+    const gw   = blocks(c.rng.int(c.hard?3:2, maxB));
+    const tail = blocks(4);
     ground(o,x,lead);
     ground(o,x+lead+gw,tail);
-    if (c.rng.chance(0.4)) coinAt(o,x+lead+gw/2, GY-95, c.rng);
+    if (c.rng.chance(0.4)) coinAt(o,x+lead+gw/2, GY-blocks(2), c.rng);
     return lead+gw+tail;
   },
 
   /* two holes with a tiny island — rewards a double jump */
   doubleGap(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(90, jd*0.28);
-    const g1 = jd*c.rng.range(0.26,0.38);
-    const isle = Math.max(70, jd*0.22);
-    const g2 = jd*c.rng.range(0.26,0.40);
-    const tail = Math.max(110, jd*0.34);
+    const maxB = clamp(Math.floor(reachBlocks(c.spd)*0.55), 2, 4);
+    const lead = blocks(3);
+    const g1   = blocks(c.rng.int(2,maxB));
+    const isle = blocks(2);
+    const g2   = blocks(c.rng.int(2,maxB));
+    const tail = blocks(4);
     ground(o,x,lead);
     ground(o,x+lead+g1,isle);
     ground(o,x+lead+g1+isle+g2,tail);
-    coinAt(o,x+lead+g1+isle/2, GY-100, c.rng);
+    coinAt(o,x+lead+g1+isle/2, GY-blocks(2), c.rng);
     return lead+g1+isle+g2+tail;
   },
 
   /* floating platform to land on. sides kill. */
   airPlat(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(110, jd*0.34);
-    const pw = Math.max(90, jd*c.rng.range(0.32,0.5));
-    const ph = c.rng.range(78, 112);
-    const tail = Math.max(120, jd*0.4);
+    const lead = blocks(3);
+    const pw   = blocks(c.rng.int(2,4));
+    // 2 blocks clears a single jump; 3 needs the double, so only when allowed
+    const ph   = blocks(!c.noDouble && c.rng.chance(0.4) ? 3 : 2);
+    const tail = blocks(4);
     ground(o,x,lead+pw+tail);
-    block(o,x+lead,GY-ph,pw,16);
-    // something worth going up there for
-    if (c.rng.chance(0.55)) coinAt(o,x+lead+pw/2, GY-ph-40, c.rng);
-    // low threat under the platform so the top route matters
-    if (c.hard && c.rng.chance(0.6)) spike(o,x+lead+pw*0.4,GY,1);
+    block(o,x+lead,GY-ph,pw,B/2);
+    if (c.rng.chance(0.55)) coinAt(o,x+lead+pw/2, GY-ph-blocks(1), c.rng);
+    if (c.hard && c.rng.chance(0.6)) spike(o,x+lead+B,GY,1);
     return lead+pw+tail;
   },
 
   /* stepped ground at different heights */
   steps(o,x,c){
-    const jd = jumpDist(c.spd);
     const n = c.rng.int(2,3);
-    const stepW = Math.max(96, jd*0.30);
-    const lead = Math.max(80, jd*0.24);
+    const stepW = blocks(2);
+    const lead = blocks(2);
     ground(o,x,lead);
-    let cx = x+lead, h = 0;
+    let cx = x+lead, hB = 0;
     for (let i=0;i<n;i++){
-      h += c.rng.range(38,62);
-      h = Math.min(h, jumpH()-24);
-      ground(o,cx,stepW,GY-h);
-      if (i===n-1 && c.rng.chance(0.5)) coinAt(o,cx+stepW/2, GY-h-52, c.rng);
+      hB = Math.min(hB+1, 2);                 // one block per step, capped under the apex
+      ground(o,cx,stepW,GY-blocks(hB));
+      if (i===n-1 && c.rng.chance(0.5)) coinAt(o,cx+stepW/2, GY-blocks(hB+1), c.rng);
       cx += stepW;
     }
-    // drop back down, spikes in the pit below
-    const pit = Math.max(100, jd*0.32);
-    const spikeStart = cx + Math.max(70, pit*0.5);
-    if (c.hard) spike(o,spikeStart,GY,2);
-    ground(o,cx,pit+Math.max(110,jd*0.34));
-    return (cx+pit+Math.max(110,jd*0.34))-x;
+    const pit = blocks(3);
+    if (c.hard) spike(o,cx+blocks(1),GY,2);
+    ground(o,cx,pit+blocks(3));
+    return (cx+pit+blocks(3))-x;
   },
 
   /* GD-style floating staircase with a spike bed underneath */
   stairSpikes(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(100, jd*0.28);
-    const stepW = Math.max(84, jd*0.26);
+    const lead = blocks(3);
+    const stepW = blocks(2);
     const n = 3;
-    const bedW = stepW*n;
-    ground(o,x,lead+bedW+Math.max(130,jd*0.42));
-    let cx = x+lead, h = 58;
+    const tail = blocks(4);
+    ground(o,x,lead+stepW*n+tail);
+    let cx = x+lead, hB = 2;
     for (let i=0;i<n;i++){
-      block(o,cx,GY-h,stepW,16);
-      cx += stepW; h = Math.min(h+42, jumpH()+96);
+      block(o,cx,GY-blocks(hB),stepW,B/2);
+      cx += stepW; hB = Math.min(hB+1, c.noDouble?3:4);
     }
-    // spike bed under the staircase — falling costs the run
-    const bedN = clamp(Math.floor((cx-(x+lead)-14)/SPIKE_W), 1, 10);
-    spike(o, x+lead+7, GY, bedN);
-    if (c.rng.chance(0.5)) coinAt(o,cx-stepW/2, GY-h-30, c.rng);
-    return (cx+Math.max(130,jd*0.42))-x;
+    spike(o, x+lead, GY, n*2);              // the bed under the staircase
+    if (c.rng.chance(0.5)) coinAt(o,cx-stepW/2, GY-blocks(hB+1), c.rng);
+    return (cx+tail)-x;
   },
 
   /* overhead block — must crouch */
   ceiling(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(110, jd*0.34);
-    const cw = c.rng.range(90, Math.max(130, jd*0.42));
-    const tail = Math.max(110, jd*0.34);
+    const lead = blocks(3);
+    const cw   = blocks(c.rng.int(2,4));
+    const tail = blocks(3);
     ground(o,x,lead+cw+tail);
-    block(o,x+lead,GY-140,cw,102,'ceil');   // bottom edge sits 38px over the floor
-    if (c.rng.chance(0.3)) coinAt(o,x+lead+cw/2, GY-20, c.rng);
-    if (c.hard && c.rng.chance(0.4)) spike(o,x+lead-SPIKE_W-14,GY,1);
+    // hangs 3 blocks up, bottom edge 46px over the floor: too low to stand, fine to crouch
+    block(o,x+lead,GY-blocks(3),cw,blocks(3)-46,'ceil');
+    if (c.rng.chance(0.3)) coinAt(o,x+lead+cw/2, GY-22, c.rng);
+    if (c.hard && c.rng.chance(0.4)) spike(o,x+lead-blocks(1)-10,GY,1);
     return lead+cw+tail;
   },
 
   /* square that slides up and down */
   movers(o,x,c){
-    const jd = jumpDist(c.spd);
     const n = c.hard ? c.rng.int(1,2) : 1;
-    const spacing = Math.max(150, jd*0.5);
-    const lead = Math.max(110, jd*0.34);
-    ground(o,x,lead+spacing*n+Math.max(110,jd*0.34));
+    const spacing = blocks(4);
+    const lead = blocks(3), tail = blocks(3);
+    ground(o,x,lead+spacing*n+tail);
     for (let i=0;i<n;i++){
-      const cycleDist = 420;                      // constant in world-space → speed-independent timing
-      o.hazards.push({type:'mover',x:x+lead+i*spacing,y:GY-100,w:36,h:36,
-        amp:c.rng.range(52,78), cycle:cycleDist, phase:c.rng.range(0,1), base:GY-96});
+      o.hazards.push({type:'mover',x:x+lead+i*spacing,y:GY-blocks(2),w:B,h:B,
+        amp:blocks(c.rng.range(1,1.5)), cycle:blocks(8), phase:c.rng.range(0,1), base:GY-blocks(2)});
     }
-    if (c.rng.chance(0.35)) coinAt(o,x+lead+spacing*n*0.5, GY-40, c.rng);
-    return lead+spacing*n+Math.max(110,jd*0.34);
+    if (c.rng.chance(0.35)) coinAt(o,x+lead+spacing*n*0.5, GY-blocks(1), c.rng);
+    return lead+spacing*n+tail;
   },
 
   /* raised platform with a spike on each shoulder */
   spikeBridge(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(110, jd*0.32);
-    const pw = Math.max(120, jd*0.46);
-    const ph = c.rng.range(56,88);
+    const lead = blocks(3);
+    const pw = blocks(c.rng.int(4,5));
+    const ph = blocks(2);
     ground(o,x,lead);
     ground(o,x+lead,pw,GY-ph);
-    spike(o,x+lead+4,GY-ph,1);
-    spike(o,x+lead+pw-SPIKE_W-4,GY-ph,1);
-    if (c.rng.chance(0.4)) coinAt(o,x+lead+pw/2, GY-ph-46, c.rng);
-    const tail = Math.max(120, jd*0.38);
+    spike(o,x+lead,GY-ph,1);
+    spike(o,x+lead+pw-SPIKE_W,GY-ph,1);
+    if (c.rng.chance(0.4)) coinAt(o,x+lead+pw/2, GY-ph-blocks(1), c.rng);
+    const tail = blocks(4);
     ground(o,x+lead+pw,tail);
     return lead+pw+tail;
   },
 
   /* sticky gum on the floor (Chewing-gum world) */
   gumField(o,x,c){
-    const jd = jumpDist(c.spd);
-    const lead = Math.max(110, jd*0.32);
+    const lead = blocks(3);
     const n = c.rng.int(1,3);
-    const step = Math.max(130, jd*0.42);
-    ground(o,x,lead+step*n+Math.max(110,jd*0.34));
+    const step = blocks(4);
+    const tail = blocks(3);
+    ground(o,x,lead+step*n+tail);
     for(let i=0;i<n;i++){
-      o.hazards.push({type:'gum',x:x+lead+i*step,y:GY-14,w:c.rng.range(40,72),h:14,t:c.rng.range(0,6)});
+      o.hazards.push({type:'gum',x:x+lead+i*step,y:GY-18,w:B,h:18,t:c.rng.range(0,6)});
     }
-    if (c.rng.chance(0.35)) coinAt(o,x+lead+step*n*0.5, GY-100, c.rng);
-    return lead+step*n+Math.max(110,jd*0.34);
+    if (c.rng.chance(0.35)) coinAt(o,x+lead+step*n*0.5, GY-blocks(2), c.rng);
+    return lead+step*n+tail;
   },
 };
 
@@ -1245,7 +1303,7 @@ const Gen = {
 
       // recovery run, longer after the punishing stuff
       const heavy = ['stairSpikes','doubleGap','movers','steps'].includes(key);
-      const rec = Math.max(70, jd*(heavy?0.34:0.18));
+      const rec = blocks(heavy?3:2);
       ground(out, this.cursor, rec);
       this.cursor += rec;
       this.last = key;
@@ -1276,7 +1334,7 @@ const Game = {
   colTimer:0, colEvents:[],
   bgT:0, shake:0, shakeMag:0,
   barrierX:-260, fill:0, overShown:false, result:null,
-  cd:0, cdMax:CFG.SKILL_CD, skillUses:0,
+  cd:0, cdMax:10, skillT:0, skillUses:0,
   hudT:0,
 
   p:null,
@@ -1322,20 +1380,34 @@ const Game = {
   keys:{}, jumpHeld:false, crouchHeld:false,
   bindInput(){
     const jd = ()=>this.pressJump(), ju = ()=>{ this.jumpHeld=false; };
+    /* every action reads from the player's own bindings */
+    const act = code => {
+      const K = Object.assign({}, DEFAULT_KEYS, Save.d.keys||{});
+      if (code===K.jump   || code===K.jumpAlt)   return 'jump';
+      if (code===K.crouch || code===K.crouchAlt) return 'crouch';
+      if (code===K.skill)     return 'skill';
+      if (code===K.laneLeft)  return 'left';
+      if (code===K.laneRight) return 'right';
+      if (code===K.pause)     return 'pause';
+      return null;
+    };
+    this.actionFor = act;
     addEventListener('keydown', e=>{
-      if (e.repeat) return;
-      const k = e.code;
-      if (['Space','ArrowUp','KeyW','KeyZ'].includes(k)){ e.preventDefault(); this.jumpHeld=true; jd(); }
-      else if (['ArrowDown','KeyS'].includes(k)){ e.preventDefault(); this.setCrouch(true); }
-      else if (['ArrowLeft','KeyA','KeyQ'].includes(k)) this.lane(-1);
-      else if (['ArrowRight','KeyD'].includes(k)) this.lane(1);
-      else if (['KeyE','ShiftLeft','ShiftRight'].includes(k)) this.useSkill();
-      else if (['Escape','KeyP'].includes(k)) UI.togglePause();
+      if (e.repeat || UI.rebinding) return;
+      switch(act(e.code)){
+        case 'jump':   e.preventDefault(); this.jumpHeld=true; jd(); break;
+        case 'crouch': e.preventDefault(); this.setCrouch(true); break;
+        case 'left':   this.lane(-1); break;
+        case 'right':  this.lane(1); break;
+        case 'skill':  this.useSkill(); break;
+        case 'pause':  UI.togglePause(); break;
+      }
     });
     addEventListener('keyup', e=>{
-      const k = e.code;
-      if (['Space','ArrowUp','KeyW','KeyZ'].includes(k)) ju();
-      else if (['ArrowDown','KeyS'].includes(k)) this.setCrouch(false);
+      if (UI.rebinding) return;
+      const a = act(e.code);
+      if (a==='jump') ju();
+      else if (a==='crouch') this.setCrouch(false);
     });
 
     const hold=(el,on,off)=>{
@@ -1345,9 +1417,13 @@ const Game = {
     };
     hold(document.getElementById('tJump'), ()=>{this.jumpHeld=true;jd();}, ju);
     hold(document.getElementById('tCrouch'), ()=>this.setCrouch(true), ()=>this.setCrouch(false));
-    hold(document.getElementById('tLeft'), ()=>this.lane(-1));
+    hold(document.getElementById('tLeft'),  ()=>this.lane(-1));
     hold(document.getElementById('tRight'), ()=>this.lane(1));
-    document.getElementById('btnSkill').addEventListener('pointerdown', e=>{e.preventDefault();this.useSkill();});
+    document.getElementById('btnSkill').addEventListener('pointerdown', e=>{
+      e.preventDefault();
+      if (Save.d.equipSkill==='revive') return;    // automatic — nothing to press
+      this.useSkill();
+    });
 
     // canvas halves as a fallback on touch, plus swipe for lanes
     let sw = null;
@@ -1395,7 +1471,8 @@ const Game = {
   reset(worldId, spd, seed){
     this.t=0; this.score=0; this.worldX=0; this.spd=spd;
     this.solids=[]; this.hazards=[]; this.picks=[]; this.fx=[]; this.sand=[]; this.sandClouds=[];
-    this.runCoins=0; this.runShards=0; this.skillUses=0; this.cd=0;
+    this.runCoins=0; this.runShards=0; this.skillUses=0; this.cd=0; this.skillT=0;
+    this.maxT=0;
     this.barrierX=-320; this.fill=0; this.overShown=false; this.result=null;
     this.shake=0; this.bgT=0; this.colTimer=0.9;
     this.worldId=worldId; this.trans=null; this.palK=1; this.sandK=0;
@@ -1445,7 +1522,7 @@ const Game = {
     if (to.mech==='columns') kind='build';
     else if (from.mech==='columns') kind='unbuild';
     else if (to.mech==='flip' || from.mech==='flip') kind='flip';
-    this.trans = { k:kind, t:0, dur: kind==='wipe'?0.7:1.0, from:this.worldId, to:id, swapped:false };
+    this.trans = { k:kind, t:0, dur: kind==='wipe'?1.25:1.15, from:this.worldId, to:id, swapped:false };
     this.palFrom = Object.assign({}, from.pal); this.palTo = Object.assign({}, to.pal); this.palK = 0;
     Audio2.playWorld(id, false);
     Audio2.sfx('world');
@@ -1478,7 +1555,8 @@ const Game = {
     Gen.reset(Math.floor(Math.random()*1e9), cut);
     // include the transition itself, so the clear stretch AFTER the new world
     // appears is exactly breakTime — short when slow, long when fast
-    this.breakUntilX = this.worldX + this.p.screenX + px*(this.trans.dur + breakTime(this.spd));
+    const stageDur = (SPEED_STEPS[this.stepIdx]||{dur:60}).dur;
+    this.breakUntilX = this.worldX + this.p.screenX + px*(this.trans.dur + cappedBreak(this.spd, stageDur));
   },
   finishSwitch(){
     const id = this.trans.to, p = this.p;
@@ -1545,7 +1623,14 @@ const Game = {
     const p=this.p;
     if (p.gumT>0) { Audio2.sfx('deny'); return; }
     if (p.crouch) this.setCrouch(false);
-    const maxJ = p.tripleT>0 ? 3 : (this.rules.noDouble || this.worldId==='malik' ? 1 : 2);
+    let maxJ = p.tripleT>0 ? 3 : (this.rules.noDouble || this.worldId==='malik' ? 1 : 2);
+    // out of jumps with Triple Jump equipped and ready? the jump control arms it.
+    if (p.jumps >= maxJ && Save.d.equipSkill==='triple' && Save.ownsSkill('triple')
+        && !this.rules.noSkill && this.cd<=0 && this.skillT<=0 && p.tripleT<=0
+        && !this.rules.noDouble && this.worldId!=='malik'){
+      this.useSkill();
+      maxJ = 3;
+    }
     if (p.jumps >= maxJ) return;
     // a mashed second tap used to overwrite the first jump's velocity and leave
     // you LOWER than a single jump, with both jumps spent. Ignore it instead.
@@ -1589,17 +1674,20 @@ const Game = {
     if (this.state!=='run') return;
     const id = Save.d.equipSkill;
     if (!id || !Save.ownsSkill(id) || this.rules.noSkill){ Audio2.sfx('deny'); return; }
-    if (this.cd>0){ Audio2.sfx('deny'); return; }
+    if (this.cd>0 || this.skillT>0){ Audio2.sfx('deny'); return; }
     if (id==='revive') { Audio2.sfx('deny'); return; }   // fires on its own
     const p=this.p;
-    this.cd = this.cdMax; this.stats.skills++; this.skillUses++;
+    const S = skillById(id);
+    this.cdMax = S.cd;
+    if (S.dur>0) this.skillT = S.dur; else this.cd = S.cd;
+    this.stats.skills++; this.skillUses++;
     if (id==='fade'){
-      p.fadeT=5; Audio2.sfx('sk_fade');
+      p.fadeT=skillById('fade').dur; Audio2.sfx('sk_fade');
       for(let i=0;i<14;i++) this.fx.push({k:'ghost',x:p.screenX,y:p.by-p.h/2,r:CFG.R,a:0.5,life:0.7,t:0,vx:rand(-40,-160),vy:rand(-40,40),c:'#b47bff'});
       this.ring(p.screenX,p.by-p.h/2,14,120,'#b47bff',0.55);
     }
     if (id==='triple'){
-      p.tripleT=5; p.jumps=Math.max(0,p.jumps-1); Audio2.sfx('sk_triple');
+      p.tripleT=skillById('triple').dur; Audio2.sfx('sk_triple');
       for(let i=0;i<3;i++) this.ring(p.screenX,p.by-p.h/2,8+i*10,60+i*18,'#7bff9e',0.4);
     }
     if (id==='dash'){
@@ -1608,7 +1696,7 @@ const Game = {
       for(let i=0;i<18;i++) this.fx.push({k:'streak',x:p.screenX+rand(-30,30),y:p.by-rand(6,60),len:rand(60,190),a:1,life:0.35,t:0,c:'#ffffff'});
     }
     if (id==='cleanse'){
-      p.cleanseT=5; p.gumT=0; Audio2.sfx('sk_cleanse');
+      p.cleanseT=skillById('cleanse').dur; p.gumT=0; Audio2.sfx('sk_cleanse');
       this.hazards = this.hazards.filter(h=>h.type!=='gum');
       this.ring(p.screenX,p.by-p.h/2,10,340,'#7be3ff',0.85);
       for(let i=0;i<22;i++) this.fx.push({k:'spark',x:p.screenX,y:p.by-p.h/2,vx:rand(-260,260),vy:rand(-260,120),life:0.7,t:0,c:'#d8f8ff'});
@@ -1617,8 +1705,9 @@ const Game = {
   },
   tryRevive(){
     if (Save.d.equipSkill!=='revive' || !Save.ownsSkill('revive') || this.rules.noSkill) return false;
-    if (this.cd>0) return false;
-    this.cd=this.cdMax; this.stats.skills++; this.skillUses++;
+    if (this.cd>0 || this.skillT>0) return false;
+    this.cdMax = skillById('revive').cd;
+    this.cd = this.cdMax; this.stats.skills++; this.skillUses++;
     const p=this.p;
     p.invuln=1.8; p.vy=-560; p.grounded=false; p.jumps=1; p.gumT=0; p.by=Math.min(p.by,GY);
     // wipe everything the player is about to hit
@@ -1656,7 +1745,11 @@ const Game = {
     const p=this.p;
     this.t += dt;
     this.bgT += dt*this.spd;
-    if (this.cd>0) this.cd=Math.max(0,this.cd-dt);
+    // the cooldown does not begin until the effect has worn off
+    if (this.skillT>0){
+      this.skillT-=dt;
+      if (this.skillT<=0){ this.skillT=0; const s=skillById(Save.d.equipSkill); this.cd=s?s.cd:10; }
+    } else if (this.cd>0) this.cd=Math.max(0,this.cd-dt);
 
     /* ---- speed / world schedule (challenge only) ---- */
     if (this.mode==='chal'){
@@ -1669,7 +1762,10 @@ const Game = {
         if (this.stepIdx < SPEED_STEPS.length-1) this.switchWorld(this._randomWorld(this.worldId));
         else { this.nameT=2.0; this.breakUntilX=this.worldX+CFG.PX*this.spd*1.4; }
       }
-      if (this.t>=CFG.RUN_TIME){ this.finish('win'); return; }
+      if (this.spd>=2){
+        this.maxT += dt;
+        if (this.maxT>=CFG.MAX_SURVIVE){ this.finish('win'); return; }
+      }
     } else if (this.t>=this.level.len){ this.finish('clear'); return; }
 
     /* ---- transition ---- */
@@ -2073,7 +2169,14 @@ const Game = {
     x.save();
     x.translate(0,H/2); x.scale(1,flipK); x.translate(0,-H/2);
 
-    this.drawBackground();
+    if (this.trans && this.palFrom && this.palTo){
+      // the outgoing world simply dissolves into the incoming one — no black
+      const k = smoothstep(clamp(this.trans.t/this.trans.dur,0,1));
+      this.drawBackground(this.trans.from, this.palFrom, 1);
+      this.drawBackground(this.trans.to,   this.palTo,   k);
+    } else {
+      this.drawBackground(this.worldId, this.pal, 1);
+    }
     this.drawWorldName();
     this.drawTerrain();
     this.drawPicks();
@@ -2093,13 +2196,18 @@ const Game = {
     x.restore();
   },
 
-  drawBackground(){
-    const x=this.x,W=this.W,H=this.H,pal=this.pal,t=this.bgT;
+  drawBackground(id, pal, alpha){
+    const x=this.x,W=this.W,H=this.H,t=this.bgT;
+    id  = id  || this.worldId;
+    pal = pal || this.pal;
+    if (alpha===undefined) alpha = 1;
+    if (alpha<=0.002) return;
+    x.save();
+    x.globalAlpha = alpha;
     const g=x.createLinearGradient(0,0,0,H);
     g.addColorStop(0,pal.sky1); g.addColorStop(1,pal.sky2);
     x.fillStyle=g; x.fillRect(0,0,W,H);
 
-    const id = this.worldId;
     x.save();
     switch(id){
       case 'blank': {
@@ -2165,6 +2273,7 @@ const Game = {
         break;
       }
     }
+    x.restore();
     x.restore();
   },
 
@@ -2481,16 +2590,7 @@ const Game = {
     const x=this.x, W=this.W, H=this.H, k=clamp(this.trans.t/this.trans.dur,0,1);
     x.save();
     if (this.trans.k==='wipe'){
-      // a bright leading edge sweeps across; the world behind it is never hidden
-      const e = W*1.30*k - 140;
-      const g = x.createLinearGradient(W-e-200,0,W-e+60,0);
-      g.addColorStop(0,'rgba(0,0,0,0)');
-      g.addColorStop(0.72,`rgba(0,0,0,${0.34*Math.sin(k*Math.PI)})`);
-      g.addColorStop(0.95,`rgba(255,255,255,${0.55*Math.sin(k*Math.PI)})`);
-      g.addColorStop(1,'rgba(255,255,255,0)');
-      x.fillStyle=g;
-      x.beginPath(); x.moveTo(W-e-200,0); x.lineTo(W-e+60,0);
-      x.lineTo(W-e-60,H); x.lineTo(W-e-320,H); x.closePath(); x.fill();
+      // nothing to draw: the crossfade in drawBackground is the whole effect
     } else if (this.trans.k==='build'||this.trans.k==='unbuild'){
       const build = this.trans.k==='build';
       const kk = build?k:1-k;
@@ -2503,7 +2603,7 @@ const Game = {
       x.fillStyle='#000';
       x.fillRect(0,0,W,H*Math.max(0,(kk-0.75)*4));
     } else if (this.trans.k==='flip'){
-      x.globalAlpha=Math.sin(k*Math.PI)*0.28; x.fillStyle='#000'; x.fillRect(0,0,W,H);
+      x.globalAlpha=Math.sin(k*Math.PI)*0.10; x.fillStyle='#000'; x.fillRect(0,0,W,H);
     }
     x.restore();
   }
@@ -2832,8 +2932,47 @@ const UI = {
     row(T('set_flash'),sw('flash'));
     row(T('set_lefty'),sw('lefty',()=>document.body.classList.toggle('lefty',S.lefty)));
     row(T('set_fps'),sw('fps'));
+
+    /* ---------- rebindable controls (keyboard only) ---------- */
+    if (!matchMedia('(pointer:coarse)').matches){
+      const head=document.createElement('div');
+      head.className='setHead'; head.textContent=T('set_keys');
+      L.appendChild(head);
+      Save.d.keys = Object.assign({}, DEFAULT_KEYS, Save.d.keys||{});
+      KEY_ACTIONS.forEach(a=>{
+        const b=document.createElement('button');
+        b.className='keyBtn';
+        b.textContent=keyLabel(Save.d.keys[a]);
+        b.addEventListener('click',()=>this.rebind(a,b));
+        row(T('key_'+a), b);
+      });
+      const rb=document.createElement('button');
+      rb.className='keyBtn wide'; rb.textContent=T('key_reset');
+      rb.addEventListener('click',()=>{
+        Save.d.keys=Object.assign({},DEFAULT_KEYS); Save.save();
+        Audio2.sfx('ui'); this.buildSettings();
+      });
+      row('', rb);
+    }
     this.resetArmed=false;
     document.getElementById('btnReset').textContent=T('set_reset');
+  },
+  rebinding:null,
+  rebind(action, btn){
+    if (this.rebinding) return;
+    this.rebinding = action;
+    btn.classList.add('listening');
+    btn.textContent = T('key_press');
+    const done = ()=>{ this.rebinding=null; removeEventListener('keydown',onKey,true); this.buildSettings(); };
+    const onKey = e=>{
+      e.preventDefault(); e.stopPropagation();
+      if (e.code==='Escape'){ done(); return; }        // escape cancels, never binds
+      // a key can only drive one action: clear it wherever else it sits
+      KEY_ACTIONS.forEach(a=>{ if (a!==action && Save.d.keys[a]===e.code) Save.d.keys[a]=''; });
+      Save.d.keys[action]=e.code;
+      Save.save(); Audio2.sfx('ui'); done();
+    };
+    addEventListener('keydown', onKey, true);
   },
   doReset(){
     const b=document.getElementById('btnReset');
@@ -2868,12 +3007,17 @@ const UI = {
     }
     // cooldown ring
     const ring=document.querySelector('#cdRing circle'), txt=document.getElementById('cdText');
-    const k = G.cd>0 ? G.cd/G.cdMax : 0;
+    const id=Save.d.equipSkill, S=id?skillById(id):null;
+    let k=0;
+    if (G.skillT>0 && S && S.dur>0) k = G.skillT/S.dur;          // effect running
+    else if (G.cd>0) k = G.cd/(G.cdMax||1);                       // recharging
     ring.style.strokeDashoffset = 276*(1-k);
-    txt.textContent = G.cd>0 ? Math.ceil(G.cd) : '';
+    txt.textContent = G.skillT>0 ? Math.ceil(G.skillT) : (G.cd>0 ? Math.ceil(G.cd) : '');
     const btn=document.getElementById('btnSkill');
-    btn.classList.toggle('ready', !!Save.d.equipSkill && G.cd<=0);
-    btn.classList.toggle('none', !Save.d.equipSkill);
+    btn.classList.toggle('active', G.skillT>0);
+    btn.classList.toggle('ready', !!id && G.cd<=0 && G.skillT<=0);
+    btn.classList.toggle('auto', id==='revive');
+    btn.classList.toggle('none', !id);
   },
   updateSkillBtn(){
     const id=Save.d.equipSkill;
